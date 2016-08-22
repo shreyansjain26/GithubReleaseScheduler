@@ -27,7 +27,7 @@ public class Repository {
         ArrayList<Repository> repos = new ArrayList<Repository>();
 
         for(int i = 0; i < data.length(); i++) {
-            JSONObject repo = data.get(i);
+            JSONObject repo = data.getJSONObject(i);
             repos.add(new Repository(repo.getString("name"),(repo.getJSONObject("owner")).getString("login")));
         }
         return repos;

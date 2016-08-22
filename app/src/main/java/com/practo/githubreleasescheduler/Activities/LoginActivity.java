@@ -23,6 +23,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -50,15 +51,19 @@ public class LoginActivity extends AppCompatActivity {
                 final String encodedJava8 = Base64.encodeToString(keyString.getBytes(),Base64.DEFAULT);
 
                 String url = "https://api.github.com/authorizations";
-                RequestQueue queue = Volley.newRequestQueue(mContext);
-
                 final JSONObject json = new JSONObject();
+                JSONArray scopes = new JSONArray();
+                scopes.put("user");
+                scopes.put("public_repo");
+
                 try {
                     json.put("note","git release claendar");
                     json.put("client_id","37492183482f42649a5a");
                     json.put("client_secret","3bea637dcc835e30040c33893060bf585474ce76");
+                    json.put("scopes",scopes);
                 } catch (Exception e) {
                 }
+                RequestQueue queue = Volley.newRequestQueue(mContext);
 
                 JsonObjectRequest req = null;
                 req = new JsonObjectRequest(Request.Method.POST,url, json,new Response.Listener<JSONObject>() {
