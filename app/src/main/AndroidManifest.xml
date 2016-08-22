@@ -19,7 +19,9 @@
         </activity>
         <activity android:name=".Activities.LoginActivity" />
         <activity android:name=".Activities.OTPActivity" />
-        <activity android:name=".Activities.RepoActivity"></activity>
+        <activity android:name=".Activities.RepoActivity" />
+        <activity android:name=".Activities.MilestoneActivity" />
+        <activity android:name=".Activities.PrActivity"></activity>
     </application>
 
 </manifest>

@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -16,8 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.practo.githubreleasescheduler.Adapters.RepoAdapter;
-import com.practo.githubreleasescheduler.Objects.Repository;
+import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
+import com.practo.githubreleasescheduler.Objects.Milestone;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;
@@ -27,18 +28,20 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RepoActivity extends AppCompatActivity {
+public class MilestoneActivity extends AppCompatActivity {
 
     private Context mContext;
     private String oAuthToken;
-    ArrayList<Repository> repos;
+    ArrayList<Milestone> miles;
+    private String repo;
+    private String owner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_repo);
-        mContext = getApplicationContext();
+        setContentView(R.layout.activity_milestone);
 
+        mContext = getApplicationContext();
         setoAuthToken();
 
         if (oAuthToken == null) {
@@ -47,15 +50,19 @@ public class RepoActivity extends AppCompatActivity {
             mContext.startActivity(loginPage);
         }
 
+        Bundle extras = getIntent().getExtras();
+        owner = extras.get("owner").toString();
+        repo =  extras.get("repo").toString();
+
+        String url = "https://api.github.com/repos/"+owner+"/"+repo+"/milestones";
+
         RequestQueue queue = Volley.newRequestQueue(mContext);
-
         JsonArrayRequest req = null;
-        String url = "https://api.github.com/user/repos";
-
         req = new JsonArrayRequest(Request.Method.GET,url,null,new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
+                    Log.d("here","here");
                     showList(response);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -74,19 +81,16 @@ public class RepoActivity extends AppCompatActivity {
                 return params;
             }
         };
-
         queue.add(req);
 
     }
 
-
     public void showList(JSONArray data) throws JSONException {
-
-        RecyclerView rvRepos = (RecyclerView) findViewById(R.id.rvRepos);
-        repos = Repository.createRepositoriesList(data);
-        RepoAdapter adapter = new RepoAdapter(mContext, repos);
-        rvRepos.setAdapter(adapter);
-        rvRepos.setLayoutManager(new LinearLayoutManager(mContext));
+        RecyclerView rvMiles = (RecyclerView) findViewById(R.id.rvMiles);
+        miles = Milestone.createMilestonesList(data);
+        MilesAdapter adapter = new MilesAdapter(mContext, miles, repo, owner);
+        rvMiles.setAdapter(adapter);
+        rvMiles.setLayoutManager(new LinearLayoutManager(mContext));
     }
 
     private void setoAuthToken() {
@@ -95,4 +99,5 @@ public class RepoActivity extends AppCompatActivity {
         settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
         oAuthToken = settings.getString("authtoken", null);
     }
+
 }

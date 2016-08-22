@@ -21,17 +21,17 @@ public class MainActivity extends AppCompatActivity {
         mContext = getApplicationContext();
 
 
-        /*
-        SharedPreferences settings;
-        SharedPreferences.Editor editor;
-        settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE); //1
-        editor = settings.edit(); //2
-        editor.putString("authtoken", null); //3
-        editor.commit(); //4
-        */
 
         SharedPreferences settings;
         SharedPreferences.Editor editor;
+        //settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE); //1
+        //editor = settings.edit(); //2
+        //editor.putString("authtoken", null); //3
+        //editor.commit(); //4
+
+
+        //SharedPreferences settings;
+        //SharedPreferences.Editor editor;
         settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
         oAuthToken = settings.getString("authtoken",null);
 
