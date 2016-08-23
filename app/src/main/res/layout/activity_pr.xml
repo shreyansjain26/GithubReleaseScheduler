@@ -10,10 +10,26 @@
     android:background="@color/cardBack"
     tools:context="com.practo.githubreleasescheduler.Activities.PrActivity">
 
+
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Milestone"
+        android:textAlignment="center"
+        android:background="@color/cardBack"
+        android:id="@+id/milestone"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true" />
+
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rvPr"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/milestone"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

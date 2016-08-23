@@ -62,7 +62,6 @@ public class MilestoneActivity extends AppCompatActivity {
             @Override
             public void onResponse(JSONArray response) {
                 try {
-                    Log.d("here","here");
                     showList(response);
                 } catch (JSONException e) {
                     e.printStackTrace();

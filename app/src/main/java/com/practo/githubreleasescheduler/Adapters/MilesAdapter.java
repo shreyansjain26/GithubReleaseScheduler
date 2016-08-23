@@ -40,11 +40,13 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
         @Override
         public void onClick(View view) {
             String mile = mileName.getText().toString();
-            String date = mileDate.getText().toString();
+            String number = mileName.getTag().toString();
+            //String date = mileDate.getText().toString();
             Intent prPage = new Intent(view.getContext(), PrActivity.class);
             prPage.putExtra("mile", mile);
             prPage.putExtra("repo", mRepo);
             prPage.putExtra("owner",mOwner);
+            prPage.putExtra("number", number);
             view.getContext().startActivity(prPage);
         }
     }
@@ -90,6 +92,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
         nameView.setText(mile.getName());
         TextView ownerView = viewHolder.mileDate;
         ownerView.setText(mile.getDate());
+        nameView.setTag(mile.getnumber());
     }
 
     // Returns the total count of items in the list
