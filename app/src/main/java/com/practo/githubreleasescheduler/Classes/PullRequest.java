@@ -1,4 +1,4 @@
-package com.practo.githubreleasescheduler.Objects;
+package com.practo.githubreleasescheduler.Classes;
 
 import org.json.JSONArray;
 import org.json.JSONException;

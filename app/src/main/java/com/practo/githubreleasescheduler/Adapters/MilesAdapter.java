@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Activities.PrActivity;
-import com.practo.githubreleasescheduler.Objects.Milestone;
+import com.practo.githubreleasescheduler.Classes.Milestone;
 import com.practo.githubreleasescheduler.R;
 
 import java.util.List;

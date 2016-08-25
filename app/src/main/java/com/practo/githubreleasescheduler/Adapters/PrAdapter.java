@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.practo.githubreleasescheduler.Objects.PullRequest;
+import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;

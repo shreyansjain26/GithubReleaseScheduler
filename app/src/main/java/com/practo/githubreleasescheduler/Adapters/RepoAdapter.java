@@ -6,11 +6,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Activities.MilestoneActivity;
-import com.practo.githubreleasescheduler.Objects.Repository;
+import com.practo.githubreleasescheduler.Classes.Repository;
 import com.practo.githubreleasescheduler.R;
 
 import java.util.List;

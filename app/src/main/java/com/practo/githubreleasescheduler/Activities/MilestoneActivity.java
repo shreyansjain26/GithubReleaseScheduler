@@ -7,8 +7,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.widget.TextView;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -18,7 +16,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
-import com.practo.githubreleasescheduler.Objects.Milestone;
+import com.practo.githubreleasescheduler.Classes.Milestone;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;

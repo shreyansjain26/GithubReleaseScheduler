@@ -39,12 +39,15 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
         mContext = getApplicationContext();
         Button loginButton = (Button) findViewById(R.id.login);
 
         loginButton.setOnClickListener( new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
+
                 final String username = String.valueOf(((EditText) findViewById(R.id.username)).getText());
                 String password = String.valueOf(((EditText) findViewById(R.id.password)).getText());
                 String keyString = username + ":" + password;
@@ -61,16 +64,16 @@ public class LoginActivity extends AppCompatActivity {
                     json.put("client_id","37492183482f42649a5a");
                     json.put("client_secret","3bea637dcc835e30040c33893060bf585474ce76");
                     json.put("scopes",scopes);
-                } catch (Exception e) {
-                }
-                RequestQueue queue = Volley.newRequestQueue(mContext);
+                } catch (Exception e) {}
 
+                RequestQueue queue = Volley.newRequestQueue(mContext);
                 JsonObjectRequest req = null;
+
                 req = new JsonObjectRequest(Request.Method.POST,url, json,new Response.Listener<JSONObject>() {
                         @Override
                         public void onResponse(JSONObject response) {
                             try {
-                                saveAuthToken(response.getString("token"));
+                                saveAuthToken(response.getString("token"),Integer.toString(response.getInt("id")),"Basic "+ encodedJava8);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -78,29 +81,41 @@ public class LoginActivity extends AppCompatActivity {
                             repoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                             mContext.startActivity(repoIntent);
                         }
+
                     }, new Response.ErrorListener() {
                         @Override
                         public void onErrorResponse(VolleyError error) {
+
                             if(error.networkResponse.statusCode == 401 &&
                                     (error.networkResponse.headers.get("X-GitHub-OTP") != null )) {
+
                                 Intent OTPIntent = new Intent(mContext, OTPActivity.class);
+
                                 OTPIntent.putExtra("username",username);
                                 OTPIntent.putExtra("AuthEncoded",encodedJava8);
                                 OTPIntent.putExtra("authBody", json.toString());
                                 OTPIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
                                 mContext.startActivity(OTPIntent);
                             }
+
                             else {
                                 ((TextView) findViewById(R.id.here)).setText("wrong username or password");
                             }
+
                         }
+
                     }){
+
                         @Override
                         public Map<String, String> getHeaders() throws AuthFailureError {
+
                             Map<String, String>  params = new HashMap<String, String>();
                             params.put("Authorization", "Basic "+encodedJava8);
                             return params;
+
                         }
+
                     };
 
                 queue.add(req);
@@ -109,15 +124,17 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void saveAuthToken(String token){
+    private void saveAuthToken(String token, String id, String encodedUserPass){
+
         SharedPreferences settings;
         SharedPreferences.Editor editor;
-        settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE);
 
-        editor = settings.edit(); //2
-        editor.putString("authtoken", token); //3
-        editor.commit(); //4
-
+        editor = settings.edit();
+        editor.putString("authtoken", token);
+        editor.putString("authID", id);
+        editor.putString("encodedUserPass", encodedUserPass);
+        editor.commit();
 
     }
 }

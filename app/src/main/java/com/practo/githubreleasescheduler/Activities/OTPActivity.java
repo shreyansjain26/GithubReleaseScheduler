@@ -2,6 +2,7 @@ package com.practo.githubreleasescheduler.Activities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -61,16 +62,15 @@ public class OTPActivity extends AppCompatActivity {
                 req = new JsonObjectRequest(Request.Method.POST, url, finalAuthBody, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
-                        Intent repoIntent = new Intent(mContext,RepoActivity.class);
                         try {
-                            repoIntent.putExtra("OAuth",response.getString("token"));
+                            saveAuthToken(response.getString("token"),
+                                    Integer.toString(response.getInt("id")),"Basic " + finalAuthEncoded );
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        Intent repoIntent = new Intent(mContext,RepoActivity.class);
                         repoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         mContext.startActivity(repoIntent);
-                        //((TextView) findViewById(R.id.here)).setText("here");
-
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -91,6 +91,21 @@ public class OTPActivity extends AppCompatActivity {
 
             }
         });
+
+    }
+
+    private void saveAuthToken(String token, String id, String encodedUserPass){
+
+        SharedPreferences settings;
+        SharedPreferences.Editor editor;
+        settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE);
+
+        editor = settings.edit();
+        editor.putString("authtoken", token);
+        editor.putString("authID", id);
+        editor.putString("encodedUserpass", encodedUserPass);
+
+        editor.commit();
 
     }
 }

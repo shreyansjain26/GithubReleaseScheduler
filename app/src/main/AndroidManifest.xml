@@ -21,7 +21,23 @@
         <activity android:name=".Activities.OTPActivity" />
         <activity android:name=".Activities.RepoActivity" />
         <activity android:name=".Activities.MilestoneActivity" />
-        <activity android:name=".Activities.PrActivity"></activity>
+        <activity android:name=".Activities.PrActivity" />
+
+        <provider
+            android:name=".Providers.GitContentProvider"
+            android:authorities="com.practo.grs.provider"
+            android:enabled="true"
+            android:exported="false" />
+
+        <service
+            android:name=".Services.GetRepoService"
+            android:exported="false" />
+        <service
+            android:name=".Services.GetMilesService"
+            android:exported="false" />
+        <service
+            android:name=".Services.GetPrService"
+            android:exported="false"></service>
     </application>
 
 </manifest>

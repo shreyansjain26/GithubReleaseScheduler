@@ -17,10 +17,8 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
 import com.practo.githubreleasescheduler.Adapters.PrAdapter;
-import com.practo.githubreleasescheduler.Objects.Milestone;
-import com.practo.githubreleasescheduler.Objects.PullRequest;
+import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;
