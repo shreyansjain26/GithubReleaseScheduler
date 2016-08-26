@@ -1,13 +1,16 @@
 package com.practo.githubreleasescheduler.Adapters;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.transition.TransitionManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Classes.PullRequest;
+import com.practo.githubreleasescheduler.Databases.PullRequestTable;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;
@@ -20,19 +23,19 @@ import java.util.List;
 /**
  * Created by shreyans on 22/08/16.
  */
+
 public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    private int mExpandedPosition = -1;
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public TextView title;
         public TextView assignee;
         public TextView label;
 
-        // We also create a constructor that accepts the entire item row
-        // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
-            // Stores the itemView in a public final member variable that can be used
-            // to access the context from any ViewHolder instance.
+
             super(itemView);
 
             title = (TextView) itemView.findViewById(R.id.title);
@@ -49,11 +52,21 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
 
     private Context mContext;
-    private List<PullRequest> mPr;
+    private Cursor mCursor;
+    private Boolean dataValid;
+    private int idColumn;
 
-    public PrAdapter(Context context, List<PullRequest> pr) {
+
+    public PrAdapter(Context context, Cursor cursor) {
         mContext = context;
-        mPr = pr;
+        mCursor = cursor;
+        if(cursor != null){
+            dataValid = true;
+            idColumn = cursor.getColumnIndex("_id");
+        } else{
+            dataValid = false;
+            idColumn = -1;
+        }
     }
 
     private Context getContext() {
@@ -63,42 +76,65 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
 
     @Override
-    public PrAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+    public PrAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                   int viewType) {
+
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-
-        // Inflate the custom layout
         View prView = inflater.inflate(R.layout.list_pr, parent, false);
-
-        // Return a new holder instance
-        ViewHolder viewHolder = new ViewHolder(prView);
-        return viewHolder;
+        return new ViewHolder(prView);
     }
 
     @Override
-    public void onBindViewHolder(PrAdapter.ViewHolder holder, int position) {
-        PullRequest pr = mPr.get(position);
-        TextView title = holder.title;
-        TextView assignee = holder.assignee;
-        TextView label = holder.label;
+    public void onBindViewHolder(PrAdapter.ViewHolder holder, final int position) {
 
-        title.setText(pr.getTitle());
-        assignee.setText(pr.getAssignee());
-        JSONArray labels = pr.getLabels();
-        if (labels != null) {
-            try {
-                JSONObject lbl = labels.getJSONObject(0);
-                label.setText(lbl.getString("name"));
-                label.setBackgroundColor(Integer.parseInt(lbl.getString("color"), 16));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+        String id, number, title, assignee, milestoneId;
+
+        if (dataValid && mCursor.moveToPosition(position)) {
+            id = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_ID));
+            number = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_NUMBER));
+            title = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_NAME));
+            assignee = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_ASSIGNEE));
+            milestoneId = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_MILSTONEID));
+
+            holder.title.setText(title);
+            holder.assignee.setText(assignee);
         }
     }
 
     @Override
     public int getItemCount() {
-        return mPr.size();
+        if(dataValid){
+            return mCursor.getCount();
+        }
+        else{
+            return 0;
+        }
+    }
+
+    public Cursor swapCursor(Cursor c) {
+        if(this.mCursor == c){
+            return null;
+        }
+        Cursor oldCursor = this.mCursor;
+        int count = getItemCount();
+        this.mCursor = c;
+        if(c!=null){
+            dataValid = true;
+            idColumn = mCursor.getColumnIndex("_id");
+            notifyDataSetChanged();
+        } else{
+            dataValid = false;
+            idColumn = -1;
+            notifyItemRangeRemoved(0,count);
+        }
+        return oldCursor;
+    }
+
+    public void changeCursor(Cursor c){
+        Cursor oldCursor = swapCursor(c);
+        if(oldCursor!=null){
+            oldCursor.close();
+        }
     }
 
 

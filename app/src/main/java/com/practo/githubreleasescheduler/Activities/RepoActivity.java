@@ -1,8 +1,12 @@
 package com.practo.githubreleasescheduler.Activities;
 
+import android.support.v4.app.LoaderManager;
 import android.content.Context;
+import android.support.v4.content.CursorLoader;
 import android.content.Intent;
+import android.support.v4.content.Loader;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,86 +21,58 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.Adapters.RepoAdapter;
-import com.practo.githubreleasescheduler.Classes.Repository;
+import com.practo.githubreleasescheduler.Databases.RepositoryTable;
+import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
+import com.practo.githubreleasescheduler.Services.GetRepoService;
 
-import org.json.JSONArray;
-import org.json.JSONException;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RepoActivity extends AppCompatActivity {
-
-    private Context mContext;
+public class RepoActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private String oAuthToken;
-    ArrayList<Repository> repos;
+    private RepoAdapter adapter;
+    private Cursor mCursor;
+    private int mId = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repo);
-        mContext = getApplicationContext();
 
         setoAuthToken();
 
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
-            loginPage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            mContext.startActivity(loginPage);
+            this.startActivity(loginPage);
         }
 
-        RequestQueue queue = Volley.newRequestQueue(mContext);
+        Intent getDataService = new Intent(this, GetRepoService.class);
+        this.startService(getDataService);
 
-        JsonArrayRequest req = null;
-        String url = "https://api.github.com/user/repos";
+        getSupportLoaderManager().initLoader(mId, null, this);
 
-        req = new JsonArrayRequest(Request.Method.GET,url,null,new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    showList(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization","Bearer " + oAuthToken);
-                return params;
-            }
-        };
 
-        queue.add(req);
+        showList();
 
     }
 
 
-    public void showList(JSONArray data) throws JSONException {
+    public void showList() {
 
         RecyclerView rvRepos = (RecyclerView) findViewById(R.id.rvRepos);
-        repos = Repository.createRepositoriesList(data);
-        RepoAdapter adapter = new RepoAdapter(mContext, repos);
+        adapter = new RepoAdapter(mCursor);
         rvRepos.setAdapter(adapter);
-        rvRepos.setLayoutManager(new LinearLayoutManager(mContext));
+        rvRepos.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        SharedPreferences.Editor editor;
-        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -121,16 +97,16 @@ public class RepoActivity extends AppCompatActivity {
 
     private void logout() {
         final SharedPreferences settings;
-        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         final String authId = settings.getString("authID", null);
         final String userPass = settings.getString("encodedUserPass", null);
 
-        RequestQueue queue = Volley.newRequestQueue(mContext);
+        RequestQueue queue = Volley.newRequestQueue(this);
 
-        StringRequest req = null;
+        StringRequest req;
         String url = "https://api.github.com/authorizations/" + authId;
-        Log.d("LOGOUT_url",url);
-        req = new StringRequest(Request.Method.DELETE,url,new Response.Listener<String>() {
+        Log.d("LOGOUT_url", url);
+        req = new StringRequest(Request.Method.DELETE, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
 
@@ -139,9 +115,9 @@ public class RepoActivity extends AppCompatActivity {
                 editor.clear();
                 editor.commit();
 
-                Intent intent = new Intent(mContext, LoginActivity.class);
+                Intent intent = new Intent(RepoActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                mContext.startActivity(intent);
+                RepoActivity.this.startActivity(intent);
 
             }
         }, new Response.ErrorListener() {
@@ -149,11 +125,11 @@ public class RepoActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
             }
-        }){
+        }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization",userPass);
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", userPass);
                 return params;
             }
         };
@@ -162,4 +138,29 @@ public class RepoActivity extends AppCompatActivity {
 
 
     }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        CursorLoader loader = new CursorLoader(this,
+                GitContentProvider.REPO_URI,
+                null,
+                null,
+                null,
+                RepositoryTable.COLUMN_ID + " DESC"
+        );
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        this.adapter.swapCursor(cursor);
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        this.adapter.swapCursor(null);
+    }
+
 }

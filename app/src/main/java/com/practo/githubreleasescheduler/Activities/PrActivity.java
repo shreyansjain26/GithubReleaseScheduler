@@ -1,39 +1,37 @@
 package com.practo.githubreleasescheduler.Activities;
 
+import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.widget.TextView;
 
-import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.Adapters.PrAdapter;
 import com.practo.githubreleasescheduler.Classes.PullRequest;
+import com.practo.githubreleasescheduler.Databases.PullRequestTable;
+import com.practo.githubreleasescheduler.Databases.RepositoryTable;
+import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import com.practo.githubreleasescheduler.Services.GetPrService;
 
 
-public class PrActivity extends AppCompatActivity {
+
+public class PrActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private Context mContext;
     private String oAuthToken;
-    ArrayList<PullRequest> pr;
+    private Cursor mCursor;
+    private int mId = 125;
+    private String mMileId;
+    private PrAdapter adapter;
+    private String mileNumber;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,7 +43,6 @@ public class PrActivity extends AppCompatActivity {
 
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
-            loginPage.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(loginPage);
         }
 
@@ -53,46 +50,26 @@ public class PrActivity extends AppCompatActivity {
         String milestone = extras.get("mile").toString();
         String repo =  extras.get("repo").toString();
         String owner = extras.get("owner").toString();
-        String mileNumber = extras.get("number").toString();
+        mileNumber = extras.get("number").toString();
+        mMileId = extras.getString("mileID");
+
+        Intent getDataService = new Intent(mContext, GetPrService.class);
+        getDataService.putExtra("owner", owner);
+        getDataService.putExtra("repo", repo);
+        getDataService.putExtra("mileNumber", mileNumber);
+        mContext.startService(getDataService);
 
         ((TextView) findViewById(R.id.milestone)).setText(milestone);
-        String url = "https://api.github.com/repos/"+owner+"/"+repo+"/issues?milestone="+mileNumber;
 
-        RequestQueue queue = Volley.newRequestQueue(mContext);
-        JsonArrayRequest req = null;
-        req = new JsonArrayRequest(Request.Method.GET,url,null,new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                try {
-                    Log.d("hola","hola");
-                    showList(response);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-            }
-        }){
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization","Bearer " + oAuthToken);
-                return params;
-            }
-        };
-        queue.add(req);
+        getSupportLoaderManager().initLoader(mId,null,this);
 
-
+        showList();
 
     }
 
-    public void showList(JSONArray data) throws JSONException {
+    public void showList() {
         RecyclerView rvPr = (RecyclerView) findViewById(R.id.rvPr);
-        pr = PullRequest.createPrList(data);
-        PrAdapter adapter = new PrAdapter(mContext, pr);
+        adapter = new PrAdapter(mContext, mCursor);
         rvPr.setAdapter(adapter);
         rvPr.setLayoutManager(new LinearLayoutManager(mContext));
     }
@@ -100,7 +77,30 @@ public class PrActivity extends AppCompatActivity {
     private void setoAuthToken() {
         SharedPreferences settings;
         SharedPreferences.Editor editor;
-        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        CursorLoader loader = new CursorLoader(this,
+                GitContentProvider.PR_URI,
+                null,
+                PullRequestTable.COLUMN_MILSTONEID + " = ? and " + PullRequestTable.COLUMN_MILENUMBER + " = ?",
+                new String[] {mMileId,mileNumber},
+                PullRequestTable.COLUMN_ID + " DESC"
+        );
+
+        return loader;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
+        this.adapter.swapCursor(cursor);
+
+    }
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+        this.adapter.swapCursor(null);
     }
 }

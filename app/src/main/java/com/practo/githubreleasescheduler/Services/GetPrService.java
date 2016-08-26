@@ -14,6 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.Databases.LabelsTable;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
 import com.practo.githubreleasescheduler.Databases.PullRequestTable;
@@ -47,11 +48,11 @@ public class GetPrService extends IntentService {
             String mileNumber = extras.getString("mileNumber");
             String url = "https://api.github.com/repos/"+owner+"/"+repo+
                     "/issues?milestone="+mileNumber;
-            getPrs(url);
+            getPrs(url, mileNumber);
         }
     }
 
-    private void getPrs(String url) {
+    private void getPrs(String url, final String mileNumber) {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonArrayRequest req = null;
 
@@ -77,18 +78,20 @@ public class GetPrService extends IntentService {
 
                         if ((pr.get("assignee")).equals(null)) {
                             value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
-                                    (pr.getJSONObject("assignee")).
-                                            getString("login"));
+                                    "No Assignee");
                         }
 
                         else {
                             value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
-                                    "No Assignee");
+                                    (pr.getJSONObject("assignee")).
+                                            getString("login"));
                         }
 
                         value[i].put(PullRequestTable.COLUMN_MILSTONEID,
                                 Integer.toString((pr.getJSONObject("milestone"))
                                         .getInt("id")));
+
+                        value[i].put(PullRequestTable.COLUMN_MILENUMBER, mileNumber);
 
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -134,7 +137,8 @@ public class GetPrService extends IntentService {
         List<ContentValues> value = new ArrayList<ContentValues>();
 
         for (int i = 0; i < response.length(); i++) {
-            JSONArray labels = (response.getJSONObject(i)).getJSONArray("labels");
+            JSONArray labels = (response.getJSONObject(i)).
+                    getJSONArray("labels");
 
             for (int j = 0; j < labels.length(); j++) {
                 JSONObject label = labels.getJSONObject(j);

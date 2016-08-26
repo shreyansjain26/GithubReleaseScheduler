@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -39,7 +40,6 @@ public class GetRepoService extends IntentService {
 
             String url = "https://api.github.com/user/repos";
 
-
             getRepo(url);
         }
     }
@@ -63,6 +63,7 @@ public class GetRepoService extends IntentService {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
+
                 }
                 getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.REPO_URI,value);
             }

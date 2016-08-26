@@ -17,6 +17,7 @@ public class MilestoneTable {
     public static final String COLUMN_OPENISSUE = "open_issue";
     public static final String COLUMN_CLOSEDISSUE = "closed_issue";
     public static final String COLUMN_DUEON = "due_on";
+    public static final String COLUMN_REPOID = "FK_repoID";
 
     //Database Creation statement
     public static final String DATABASE_CREATE = "create table "+
@@ -28,7 +29,8 @@ public class MilestoneTable {
             COLUMN_DESCRIPTION + " text not null, " +
             COLUMN_OPENISSUE + " text not null, " +
             COLUMN_CLOSEDISSUE + " text not null, " +
-            COLUMN_DUEON + " text not null " +
+            COLUMN_DUEON + " text not null, " +
+            COLUMN_REPOID + " text not null " +
             ");";
 
 

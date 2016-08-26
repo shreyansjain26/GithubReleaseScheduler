@@ -15,6 +15,7 @@ public class PullRequestTable {
     public static final String COLUMN_NUMBER = "number";
     public static final String COLUMN_ASSIGNEE = "assignee";
     public static final String COLUMN_MILSTONEID = "FK_milestoneID";
+    public static final String COLUMN_MILENUMBER = "FK_milestoneNumber";
 
     //Database Creation statement
     public static final String DATABASE_CREATE = "create table "+
@@ -24,7 +25,8 @@ public class PullRequestTable {
             COLUMN_NAME + " text not null, " +
             COLUMN_NUMBER + " text not null, " +
             COLUMN_ASSIGNEE + " text not null, " +
-            COLUMN_MILSTONEID + " text not null " +
+            COLUMN_MILSTONEID + " text not null, " +
+            COLUMN_MILENUMBER + " text not null " +
             ");";
 
 

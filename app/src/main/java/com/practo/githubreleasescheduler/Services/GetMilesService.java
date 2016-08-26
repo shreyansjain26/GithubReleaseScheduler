@@ -43,13 +43,14 @@ public class GetMilesService extends IntentService {
             Bundle extras = intent.getExtras();
             String repo = extras.getString("repo");
             String owner = extras.getString("owner");
+            String repoId = extras.getString("repoId");
             String url = "https://api.github.com/repos/"+owner+"/"+repo+"/milestones";
 
-            getMiles(url);
+            getMiles(url, repoId);
         }
     }
 
-    private void getMiles(String url) {
+    private void getMiles(String url, final String repoId) {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonArrayRequest req = null;
 
@@ -69,6 +70,7 @@ public class GetMilesService extends IntentService {
                         value[i].put(MilestoneTable.COLUMN_DESCRIPTION,mile.getString("description"));
                         value[i].put(MilestoneTable.COLUMN_OPENISSUE,Integer.toString(mile.getInt("open_issues")));
                         value[i].put(MilestoneTable.COLUMN_CLOSEDISSUE,Integer.toString(mile.getInt("closed_issues")));
+                        value[i].put(MilestoneTable.COLUMN_REPOID, repoId);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
