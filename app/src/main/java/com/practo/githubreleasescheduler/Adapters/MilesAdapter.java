@@ -13,6 +13,7 @@ import android.widget.TextView;
 import com.practo.githubreleasescheduler.Activities.PrActivity;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
 import com.practo.githubreleasescheduler.R;
+import com.practo.githubreleasescheduler.Utils.Utils;
 
 import java.text.SimpleDateFormat;
 
@@ -56,27 +57,19 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             prPage.putExtra("open", opnclose[0]);
             prPage.putExtra("closed", opnclose[1]);
             prPage.putExtra("due", dueDate);
-            prPage.putExtra("lastUpdate",lastUpdate);
+            prPage.putExtra("lastUpdate", lastUpdate);
             view.getContext().startActivity(prPage);
         }
     }
 
-    private Context mContext;
     private String mRepo;
     private String mOwner;
     private Cursor mCursor;
-    private boolean dataValid;
 
-    public MilesAdapter(Context context, String repo, String owner, Cursor cursor) {
-        mContext = context;
+    public MilesAdapter(String repo, String owner, Cursor cursor) {
         mRepo = repo;
         mOwner = owner;
         mCursor = cursor;
-        if (cursor != null) {
-            dataValid = true;
-        } else {
-            dataValid = false;
-        }
     }
 
     public MilesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -91,7 +84,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
         String id, number, title, dueOn, lastUpdate;
         String openIssue, closedIssue;
 
-        if (dataValid && mCursor.moveToPosition(position)) {
+        if (!Utils.isCursorEmpty(mCursor) && mCursor.moveToPosition(position)) {
             id = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_ID));
             number = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NUMBER));
             title = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NAME));
@@ -131,7 +124,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
-        if (dataValid) {
+        if (!Utils.isCursorEmpty(mCursor)) {
             return mCursor.getCount();
         } else {
             return 0;
@@ -145,21 +138,12 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
         Cursor oldCursor = this.mCursor;
         int count = getItemCount();
         this.mCursor = c;
-        if (c != null) {
-            dataValid = true;
+        if (!Utils.isCursorEmpty(mCursor)) {
             notifyDataSetChanged();
         } else {
-            dataValid = false;
             notifyItemRangeRemoved(0, count);
         }
         return oldCursor;
-    }
-
-    public void changeCursor(Cursor c) {
-        Cursor oldCursor = swapCursor(c);
-        if (oldCursor != null) {
-            oldCursor.close();
-        }
     }
 
 

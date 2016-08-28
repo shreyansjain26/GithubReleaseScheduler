@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -37,7 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         SharedPreferences settings;
         settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
         String oAuthToken = settings.getString("authtoken", null);
@@ -45,6 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         if (oAuthToken != null) {
             Intent repoPage = new Intent(this, RepoActivity.class);
             this.startActivity(repoPage);
+            finish();
         }
 
 
@@ -143,5 +145,15 @@ public class LoginActivity extends AppCompatActivity {
         };
 
         queue.add(req);
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

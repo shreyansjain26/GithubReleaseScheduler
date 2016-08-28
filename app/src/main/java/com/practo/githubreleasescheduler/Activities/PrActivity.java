@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -27,9 +29,9 @@ import com.practo.githubreleasescheduler.Services.GetPrService;
 
 public class PrActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private Context mContext;
+    //private Context mContext;
     private String oAuthToken;
-    private Cursor mCursor;
+    //private Cursor mCursor;
     private int mId = 125;
     private String mMileId;
     private PrAdapter adapter;
@@ -39,13 +41,15 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pr);
-
-        mContext = getApplicationContext();
+        getSupportActionBar().setTitle("Pull Requests");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //mContext = getApplicationContext();
         setoAuthToken();
 
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
-            mContext.startActivity(loginPage);
+            this.startActivity(loginPage);
+            finish();
         }
 
         Bundle extras = getIntent().getExtras();
@@ -59,11 +63,11 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         String due = extras.getString("due");
         String lastUpdate = extras.getString("lastUpdate");
 
-        Intent getDataService = new Intent(mContext, GetPrService.class);
+        Intent getDataService = new Intent(this, GetPrService.class);
         getDataService.putExtra("owner", owner);
         getDataService.putExtra("repo", repo);
         getDataService.putExtra("mileNumber", mileNumber);
-        mContext.startService(getDataService);
+        this.startService(getDataService);
 
         ((TextView) findViewById(R.id.milestone)).setText(milestone);
         ((TextView) findViewById(R.id.dueDate)).setText(due);
@@ -87,15 +91,15 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
 
     public void showList() {
         RecyclerView rvPr = (RecyclerView) findViewById(R.id.rvPr);
-        adapter = new PrAdapter(mContext, mCursor);
+        adapter = new PrAdapter(null);
         rvPr.setAdapter(adapter);
-        rvPr.setLayoutManager(new LinearLayoutManager(mContext));
+        rvPr.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setoAuthToken() {
         SharedPreferences settings;
         SharedPreferences.Editor editor;
-        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -121,5 +125,16 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         this.adapter.swapCursor(null);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

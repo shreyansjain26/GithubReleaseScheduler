@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.content.Intent;
 import android.support.v4.content.Loader;
@@ -42,19 +43,20 @@ import java.util.Map;
 public class RepoActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
     private String oAuthToken;
     private RepoAdapter adapter;
-    private Cursor mCursor;
     private int mId = 123;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repo);
-
+        getSupportActionBar().setTitle("Repositories");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         setoAuthToken();
 
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
             this.startActivity(loginPage);
+            finish();
         }
 
         Intent getDataService = new Intent(this, GetRepoService.class);
@@ -71,7 +73,7 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
     public void showList() {
 
         RecyclerView rvRepos = (RecyclerView) findViewById(R.id.rvRepos);
-        adapter = new RepoAdapter(mCursor);
+        adapter = new RepoAdapter(null);
         rvRepos.setAdapter(adapter);
         rvRepos.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -93,6 +95,9 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
             case R.id.action_logout:
                 logout();
                 return true;
@@ -180,7 +185,7 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         editor = settings.edit();
         editor.clear();
         editor.apply();
-        ContentResolver resolver = getApplicationContext().getContentResolver();
+        ContentResolver resolver = RepoActivity.this.getContentResolver();
         resolver.delete(GitContentProvider.REPO_URI, null, null);
         resolver.delete(GitContentProvider.MILES_URI, null, null);
         resolver.delete(GitContentProvider.PR_URI, null, null);

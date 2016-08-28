@@ -6,12 +6,14 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.support.v4.app.LoaderManager;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -30,6 +32,8 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pr_description);
+        getSupportActionBar().setTitle("Pull Request");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
         setoAuthToken();
@@ -37,6 +41,7 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
             this.startActivity(loginPage);
+            finish();
         }
 
         Bundle extras = getIntent().getExtras();
@@ -109,5 +114,16 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

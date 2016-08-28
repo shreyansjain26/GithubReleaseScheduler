@@ -14,6 +14,7 @@ import com.practo.githubreleasescheduler.Activities.PrDescriptionActivity;
 import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.Databases.PullRequestTable;
 import com.practo.githubreleasescheduler.R;
+import com.practo.githubreleasescheduler.Utils.Utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,23 +58,11 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
     }
 
 
-    private Context mContext;
     private Cursor mCursor;
-    private Boolean dataValid;
 
 
-    public PrAdapter(Context context, Cursor cursor) {
-        mContext = context;
+    public PrAdapter(Cursor cursor) {
         mCursor = cursor;
-        if (cursor != null) {
-            dataValid = true;
-        } else {
-            dataValid = false;
-        }
-    }
-
-    private Context getContext() {
-        return mContext;
     }
 
 
@@ -91,7 +80,7 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
         String id, number, title, assignee, milestoneId;
 
-        if (dataValid && mCursor.moveToPosition(position)) {
+        if (!Utils.isCursorEmpty(mCursor) && mCursor.moveToPosition(position)) {
             id = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_ID));
             number = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_NUMBER));
             title = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_NAME));
@@ -106,7 +95,7 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
     @Override
     public int getItemCount() {
-        if (dataValid) {
+        if (!Utils.isCursorEmpty(mCursor)) {
             return mCursor.getCount();
         } else {
             return 0;
@@ -120,11 +109,9 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
         Cursor oldCursor = this.mCursor;
         int count = getItemCount();
         this.mCursor = c;
-        if (c != null) {
-            dataValid = true;
+        if (!Utils.isCursorEmpty(mCursor)) {
             notifyDataSetChanged();
         } else {
-            dataValid = false;
             notifyItemRangeRemoved(0, count);
         }
         return oldCursor;

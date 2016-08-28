@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -26,13 +27,14 @@ import java.util.Map;
 
 public class OTPActivity extends AppCompatActivity {
 
-    private Context mContext;
+    //private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp);
-        mContext = getApplicationContext();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //mContext = getApplicationContext();
         final String url = "https://api.github.com/authorizations";
         Bundle extras = getIntent().getExtras();
         JSONObject authBody = null;
@@ -56,7 +58,7 @@ public class OTPActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 final String otp = String.valueOf(((TextView) findViewById(R.id.otp)).getText());
-                RequestQueue queue = Volley.newRequestQueue(mContext);
+                RequestQueue queue = Volley.newRequestQueue(OTPActivity.this);
                 JsonObjectRequest req = null;
 
                 req = new JsonObjectRequest(Request.Method.POST, url, finalAuthBody, new Response.Listener<JSONObject>() {
@@ -68,9 +70,9 @@ public class OTPActivity extends AppCompatActivity {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Intent repoIntent = new Intent(mContext,RepoActivity.class);
+                        Intent repoIntent = new Intent(OTPActivity.this,RepoActivity.class);
                         repoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(repoIntent);
+                        OTPActivity.this.startActivity(repoIntent);
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -106,5 +108,15 @@ public class OTPActivity extends AppCompatActivity {
         editor.putString("encodedUserPass", encodedUserPass);
         editor.apply();
 
+    }
+
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 }

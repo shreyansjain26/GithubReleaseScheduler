@@ -5,12 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.MenuItem;
 
 
 import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
@@ -20,17 +22,18 @@ import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetMilesService;
+
 import java.util.ArrayList;
 
 
 public class MilestoneActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
-    private Context mContext;
+    //private Context mContext;
     private String oAuthToken;
     private String repo;
     private String owner;
     private String repoId;
-    private Cursor mCursor;
+    //private Cursor mCursor;
     private MilesAdapter adapter;
     private int mId = 124;
 
@@ -39,43 +42,45 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_milestone);
-
-        mContext = getApplicationContext();
+        getSupportActionBar().setTitle("Milestones");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        //mContext = getApplicationContext();
         setoAuthToken();
 
         if (oAuthToken == null) {
             Intent loginPage = new Intent(this, LoginActivity.class);
-            mContext.startActivity(loginPage);
+            this.startActivity(loginPage);
+            finish();
         }
         Bundle extras = getIntent().getExtras();
         owner = extras.get("owner").toString();
-        repo =  extras.get("repo").toString();
+        repo = extras.get("repo").toString();
         repoId = extras.get("repoId").toString();
 
-        Intent getDataService = new Intent(mContext, GetMilesService.class);
+        Intent getDataService = new Intent(this, GetMilesService.class);
         getDataService.putExtra("repo", repo);
         getDataService.putExtra("owner", owner);
         getDataService.putExtra("repoId", repoId);
-        mContext.startService(getDataService);
+        this.startService(getDataService);
 
-        getSupportLoaderManager().initLoader(mId,null,this);
+        getSupportLoaderManager().initLoader(mId, null, this);
 
         showList();
 
     }
 
-    public void showList(){
+    public void showList() {
         RecyclerView rvMiles = (RecyclerView) findViewById(R.id.rvMiles);
         //miles = Milestone.createMilestonesList(data);
-        adapter = new MilesAdapter(mContext, repo, owner, mCursor);
+        adapter = new MilesAdapter(repo, owner, null);
         rvMiles.setAdapter(adapter);
-        rvMiles.setLayoutManager(new LinearLayoutManager(mContext));
+        rvMiles.setLayoutManager(new LinearLayoutManager(this));
     }
 
     private void setoAuthToken() {
         SharedPreferences settings;
         SharedPreferences.Editor editor;
-        settings = mContext.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -103,4 +108,14 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
         this.adapter.swapCursor(null);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
 }
