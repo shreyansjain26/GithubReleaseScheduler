@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.format.DateUtils;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -18,9 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.practo.githubreleasescheduler.Classes.Milestone;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
-import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 
 import org.json.JSONArray;
@@ -36,6 +32,7 @@ import java.util.Map;
 public class GetMilesService extends IntentService {
 
     private String mOAuthToken;
+    private String url;
 
     public GetMilesService() {
         super("GetMilesService");
@@ -49,17 +46,17 @@ public class GetMilesService extends IntentService {
             String repo = extras.getString("repo");
             String owner = extras.getString("owner");
             String repoId = extras.getString("repoId");
-            String url = "https://api.github.com/repos/" + owner + "/" + repo + "/milestones";
+            url = "https://api.github.com/repos/" + owner + "/" + repo + "/milestones?per_page=100&page=";
 
-            getMiles(url, repoId);
+            getMiles(repoId, 1);
         }
     }
 
-    private void getMiles(String url, final String repoId) {
+    private void getMiles(final String repoId, final int page) {
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonArrayRequest req = null;
-
-        req = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
+        JsonArrayRequest req;
+        String pageUrl = url + Integer.toString(page);
+        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 int length = response.length();
@@ -72,7 +69,7 @@ public class GetMilesService extends IntentService {
                         value[i].put(MilestoneTable.COLUMN_NUMBER, Integer.toString(mile.getInt("number")));
                         value[i].put(MilestoneTable.COLUMN_NAME, mile.getString("title"));
                         value[i].put(MilestoneTable.COLUMN_DUEON, mile.getString("due_on"));
-                        value[i].put(MilestoneTable.COLUMN_LASTUPDATE,mile.getString("updated_at"));
+                        value[i].put(MilestoneTable.COLUMN_LASTUPDATE, mile.getString("updated_at"));
                         value[i].put(MilestoneTable.COLUMN_DESCRIPTION, mile.getString("description"));
                         value[i].put(MilestoneTable.COLUMN_OPENISSUE, Integer.toString(mile.getInt("open_issues")));
                         value[i].put(MilestoneTable.COLUMN_CLOSEDISSUE, Integer.toString(mile.getInt("closed_issues")));
@@ -87,6 +84,10 @@ public class GetMilesService extends IntentService {
                     }
                 }
                 getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.MILES_URI, value);
+
+                if (length != 0 && length == 100) {
+                    getMiles(repoId, page + 1);
+                }
             }
 
         }, new Response.ErrorListener() {
@@ -123,11 +124,15 @@ public class GetMilesService extends IntentService {
         String dueDateTemp = (date.replace("T", " ")).replace("Z", "");
         try {
             dueDate = newSdf.parse(newSdf.format(sdf.parse(dueDateTemp)));
+
+            if (dueDate.before(new Date())) return;
+
             intent.putExtra("title", title);
             PendingIntent sender = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarm1 = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarm1.set(AlarmManager.RTC_WAKEUP, dueDate.getTime(), sender);
             setAlarmTimeById(id, date);
+
         } catch (Exception e) {
             e.printStackTrace();
         }

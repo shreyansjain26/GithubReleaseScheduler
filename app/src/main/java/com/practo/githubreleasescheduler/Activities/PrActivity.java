@@ -57,6 +57,7 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         String open = extras.getString("open");
         String closed = extras.getString("closed");
         String due = extras.getString("due");
+        String lastUpdate = extras.getString("lastUpdate");
 
         Intent getDataService = new Intent(mContext, GetPrService.class);
         getDataService.putExtra("owner", owner);
@@ -76,7 +77,7 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         ((TextView) findViewById(R.id.completion)).setText(String.valueOf(completion) + "% Complete");
         ((TextView) findViewById(R.id.open)).setText(open + " Open");
         ((TextView) findViewById(R.id.closed)).setText(closed + " Closed");
-        ((TextView) findViewById(R.id.lastUpdated)).setText("Last updated 11 days ago");
+        ((TextView) findViewById(R.id.lastUpdated)).setText(lastUpdate);
 
         getSupportLoaderManager().initLoader(mId, null, this);
 

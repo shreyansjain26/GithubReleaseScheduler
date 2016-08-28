@@ -5,7 +5,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -14,7 +13,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.practo.githubreleasescheduler.Classes.Repository;
 import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 
@@ -29,31 +27,35 @@ import java.util.Map;
 public class GetRepoService extends IntentService {
 
     private String mOAuthToken;
+    private String url;
 
-
-    public GetRepoService() { super("GetRepoService"); }
+    public GetRepoService() {
+        super("GetRepoService");
+    }
 
     @Override
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             setoAuthToken();
 
-            String url = "https://api.github.com/user/repos";
+            url = "https://api.github.com/user/repos?per_page=100&page=";
 
-            getRepo(url);
+            getRepo(1);
         }
     }
-    private void getRepo(String url) {
+
+    private void getRepo(final int page) {
 
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonArrayRequest req = null;
+        JsonArrayRequest req;
+        String pageUrl = url + Integer.toString(page);
 
-        req = new JsonArrayRequest(Request.Method.GET,url,null,new Response.Listener<JSONArray>() {
+        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 int length = response.length();
                 ContentValues[] value = new ContentValues[length];
-                for(int i = 0; i < length; i++) {
+                for (int i = 0; i < length; i++) {
                     try {
                         JSONObject repo = response.getJSONObject(i);
                         value[i] = new ContentValues();
@@ -65,18 +67,22 @@ public class GetRepoService extends IntentService {
                     }
 
                 }
-                getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.REPO_URI,value);
+                getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.REPO_URI, value);
+
+                if (length != 0 && length == 100) {
+                    getRepo(page + 1);
+                }
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
             }
-        }){
+        }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization","Bearer " + mOAuthToken);
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer " + mOAuthToken);
                 return params;
             }
         };

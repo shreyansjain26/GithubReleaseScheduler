@@ -45,6 +45,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             String mileId = openClose.getTag().toString();
             String[] opnclose = oc.split("/");
             String dueDate = mileDate.getText().toString();
+            String lastUpdate = mileDate.getTag().toString();
 
             Intent prPage = new Intent(view.getContext(), PrActivity.class);
             prPage.putExtra("mile", mile);
@@ -55,6 +56,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             prPage.putExtra("open", opnclose[0]);
             prPage.putExtra("closed", opnclose[1]);
             prPage.putExtra("due", dueDate);
+            prPage.putExtra("lastUpdate",lastUpdate);
             view.getContext().startActivity(prPage);
         }
     }

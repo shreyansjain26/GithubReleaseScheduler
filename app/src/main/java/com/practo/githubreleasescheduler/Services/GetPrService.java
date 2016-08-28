@@ -33,6 +33,7 @@ import java.util.Map;
 public class GetPrService extends IntentService {
 
     private String mOAuthToken;
+    private String url;
 
     public GetPrService() {
         super("GetPrService");
@@ -46,79 +47,86 @@ public class GetPrService extends IntentService {
             String owner = extras.getString("owner");
             String repo = extras.getString("repo");
             String mileNumber = extras.getString("mileNumber");
-            String url = "https://api.github.com/repos/"+owner+"/"+repo+
-                    "/issues?milestone="+mileNumber;
-            getPrs(url, mileNumber);
+            url = "https://api.github.com/repos/" + owner + "/" + repo +
+                    "/issues?milestone=" + mileNumber + "&per_page=100&page=";
+            getPrs(mileNumber, 1);
         }
     }
 
-    private void getPrs(String url, final String mileNumber) {
+    private void getPrs(final String mileNumber, final int page) {
+
+        String pageUrl = url + Integer.toString(page);
+
         RequestQueue queue = Volley.newRequestQueue(this);
-        JsonArrayRequest req = null;
+        JsonArrayRequest req;
 
-        req = new JsonArrayRequest(Request.Method.GET,url,null,
+        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null,
                 new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
+                    @Override
+                    public void onResponse(JSONArray response) {
 
-                int length = response.length();
-                ContentValues[] value = new ContentValues[length];
-                for(int i = 0; i < length; i++) {
-                    try {
-                        JSONObject pr = response.getJSONObject(i);
-                        value[i] = new ContentValues();
-                        value[i].put(PullRequestTable.COLUMN_ID,
-                                Integer.toString(pr.getInt("id")));
+                        int length = response.length();
+                        ContentValues[] value = new ContentValues[length];
+                        for (int i = 0; i < length; i++) {
+                            try {
+                                JSONObject pr = response.getJSONObject(i);
+                                value[i] = new ContentValues();
+                                value[i].put(PullRequestTable.COLUMN_ID,
+                                        Integer.toString(pr.getInt("id")));
 
-                        value[i].put(PullRequestTable.COLUMN_NUMBER,
-                                Integer.toString(pr.getInt("number")));
+                                value[i].put(PullRequestTable.COLUMN_NUMBER,
+                                        Integer.toString(pr.getInt("number")));
 
-                        value[i].put(PullRequestTable.COLUMN_NAME,
-                                pr.getString("title"));
+                                value[i].put(PullRequestTable.COLUMN_NAME,
+                                        pr.getString("title"));
 
-                        if ((pr.get("assignee")).equals(null)) {
-                            value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
-                                    "No Assignee");
+                                if ((pr.get("assignee")).equals(null)) {
+                                    value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
+                                            "No Assignee");
+                                } else {
+                                    value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
+                                            (pr.getJSONObject("assignee")).
+                                                    getString("login"));
+                                }
+
+                                value[i].put(PullRequestTable.COLUMN_MILSTONEID,
+                                        Integer.toString((pr
+                                                .getJSONObject("milestone"))
+                                                .getInt("id")));
+
+                                value[i].put(PullRequestTable.COLUMN_MILENUMBER,
+                                        mileNumber);
+
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        getApplicationContext().getContentResolver().
+                                bulkInsert(GitContentProvider.PR_URI, value);
+
+                        if (length != 0 && length == 100) {
+                            getPrs(mileNumber, page + 1);
                         }
 
-                        else {
-                            value[i].put(PullRequestTable.COLUMN_ASSIGNEE,
-                                    (pr.getJSONObject("assignee")).
-                                            getString("login"));
+                        try {
+                            getApplicationContext().getContentResolver().
+                                    bulkInsert(GitContentProvider.LABELS_URI,
+                                            getLabels(response));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
 
-                        value[i].put(PullRequestTable.COLUMN_MILSTONEID,
-                                Integer.toString((pr.getJSONObject("milestone"))
-                                        .getInt("id")));
-
-                        value[i].put(PullRequestTable.COLUMN_MILENUMBER, mileNumber);
-
-                    } catch (JSONException e) {
-                        e.printStackTrace();
                     }
-                }
-                getApplicationContext().getContentResolver().
-                        bulkInsert(GitContentProvider.PR_URI,value);
-
-                try {
-                    getApplicationContext().getContentResolver().
-                            bulkInsert(GitContentProvider.LABELS_URI,
-                                    getLabels(response));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            }
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
             }
-        }){
+        }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("Authorization","Bearer " + mOAuthToken);
+                Map<String, String> params = new HashMap<String, String>();
+                params.put("Authorization", "Bearer " + mOAuthToken);
                 return params;
             }
         };
@@ -146,7 +154,7 @@ public class GetPrService extends IntentService {
 
                 lbl.put(LabelsTable.COLUMN_NAME, label.getString("name"));
 
-                lbl.put(LabelsTable.COLUMN_COLOR,label.getString("color"));
+                lbl.put(LabelsTable.COLUMN_COLOR, label.getString("color"));
 
                 lbl.put(LabelsTable.COLUMN_PRID, Integer.toString(
                         response.getJSONObject(i).getInt("id")));
