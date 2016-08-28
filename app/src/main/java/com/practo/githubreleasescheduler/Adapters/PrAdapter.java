@@ -1,6 +1,7 @@
 package com.practo.githubreleasescheduler.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.transition.TransitionManager;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.practo.githubreleasescheduler.Activities.PrDescriptionActivity;
 import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.Databases.PullRequestTable;
 import com.practo.githubreleasescheduler.R;
@@ -28,7 +30,7 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
     private int mExpandedPosition = -1;
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
         public TextView title;
         public TextView assignee;
@@ -46,7 +48,11 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
 
         @Override
         public void onClick(View view) {
-
+            Intent prdesc = new Intent(view.getContext(), PrDescriptionActivity.class);
+            prdesc.putExtra("title", title.getText());
+            prdesc.putExtra("prId", String.valueOf(title.getTag()));
+            prdesc.putExtra("assignee", assignee.getText());
+            view.getContext().startActivity(prdesc);
         }
     }
 
@@ -54,25 +60,21 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
     private Context mContext;
     private Cursor mCursor;
     private Boolean dataValid;
-    private int idColumn;
 
 
     public PrAdapter(Context context, Cursor cursor) {
         mContext = context;
         mCursor = cursor;
-        if(cursor != null){
+        if (cursor != null) {
             dataValid = true;
-            idColumn = cursor.getColumnIndex("_id");
-        } else{
+        } else {
             dataValid = false;
-            idColumn = -1;
         }
     }
 
     private Context getContext() {
         return mContext;
     }
-
 
 
     @Override
@@ -97,42 +99,40 @@ public class PrAdapter extends RecyclerView.Adapter<PrAdapter.ViewHolder> {
             milestoneId = mCursor.getString(mCursor.getColumnIndexOrThrow(PullRequestTable.COLUMN_MILSTONEID));
 
             holder.title.setText(title);
+            holder.title.setTag(id);
             holder.assignee.setText(assignee);
         }
     }
 
     @Override
     public int getItemCount() {
-        if(dataValid){
+        if (dataValid) {
             return mCursor.getCount();
-        }
-        else{
+        } else {
             return 0;
         }
     }
 
     public Cursor swapCursor(Cursor c) {
-        if(this.mCursor == c){
+        if (this.mCursor == c) {
             return null;
         }
         Cursor oldCursor = this.mCursor;
         int count = getItemCount();
         this.mCursor = c;
-        if(c!=null){
+        if (c != null) {
             dataValid = true;
-            idColumn = mCursor.getColumnIndex("_id");
             notifyDataSetChanged();
-        } else{
+        } else {
             dataValid = false;
-            idColumn = -1;
-            notifyItemRangeRemoved(0,count);
+            notifyItemRangeRemoved(0, count);
         }
         return oldCursor;
     }
 
-    public void changeCursor(Cursor c){
+    public void changeCursor(Cursor c) {
         Cursor oldCursor = swapCursor(c);
-        if(oldCursor!=null){
+        if (oldCursor != null) {
             oldCursor.close();
         }
     }

@@ -4,38 +4,36 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Activities.PrActivity;
-import com.practo.githubreleasescheduler.Classes.Milestone;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
 import com.practo.githubreleasescheduler.R;
 
-import java.util.List;
+import java.text.SimpleDateFormat;
+
 
 /**
  * Created by shreyans on 22/08/16.
  */
-public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
+public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> {
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        // Your holder should contain a member variable
-        // for any view that will be set as you render a row
+
         public TextView mileName;
         public TextView mileDate;
+        public TextView openClose;
 
-        // We also create a constructor that accepts the entire item row
-        // and does the view lookups to find each subview
         public ViewHolder(View itemView) {
-            // Stores the itemView in a public final member variable that can be used
-            // to access the context from any ViewHolder instance.
             super(itemView);
 
             mileName = (TextView) itemView.findViewById(R.id.name);
             mileDate = (TextView) itemView.findViewById(R.id.date);
+            openClose = (TextView) itemView.findViewById(R.id.open_close);
             itemView.setOnClickListener(this);
         }
 
@@ -43,13 +41,20 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
         public void onClick(View view) {
             String mile = mileName.getText().toString();
             String number = mileName.getTag().toString();
-            //String date = mileDate.getText().toString();
+            String oc = openClose.getText().toString();
+            String mileId = openClose.getTag().toString();
+            String[] opnclose = oc.split("/");
+            String dueDate = mileDate.getText().toString();
+
             Intent prPage = new Intent(view.getContext(), PrActivity.class);
             prPage.putExtra("mile", mile);
             prPage.putExtra("repo", mRepo);
-            prPage.putExtra("owner",mOwner);
+            prPage.putExtra("owner", mOwner);
             prPage.putExtra("number", number);
-            prPage.putExtra("mileID", mMileId);
+            prPage.putExtra("mileID", mileId);
+            prPage.putExtra("open", opnclose[0]);
+            prPage.putExtra("closed", opnclose[1]);
+            prPage.putExtra("due", dueDate);
             view.getContext().startActivity(prPage);
         }
     }
@@ -59,28 +64,18 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
     private String mOwner;
     private Cursor mCursor;
     private boolean dataValid;
-    private int idColumn;
-    private String mMileId;
 
     public MilesAdapter(Context context, String repo, String owner, Cursor cursor) {
         mContext = context;
         mRepo = repo;
         mOwner = owner;
         mCursor = cursor;
-        if(cursor != null){
+        if (cursor != null) {
             dataValid = true;
-            idColumn = cursor.getColumnIndex("_id");
-        } else{
+        } else {
             dataValid = false;
-            idColumn = -1;
         }
     }
-
-    private Context getContext() {
-        return mContext;
-    }
-
-
 
     public MilesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
@@ -91,62 +86,72 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(MilesAdapter.ViewHolder viewHolder, int position) {
 
-        String id, number, title, description, dueOn;
-        int openIssue, closedIssue;
-        float completion;
+        String id, number, title, dueOn;
+        String openIssue, closedIssue;
 
         if (dataValid && mCursor.moveToPosition(position)) {
-                id = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_ID));
-                number = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NUMBER));
-                title = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NAME));
-                description = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_DESCRIPTION));
-                openIssue = Integer.parseInt(mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_OPENISSUE)));
-                closedIssue = Integer.parseInt(mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_CLOSEDISSUE)));
-                dueOn = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_DUEON));
+            id = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_ID));
+            number = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NUMBER));
+            title = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NAME));
+            openIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_OPENISSUE));
+            closedIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_CLOSEDISSUE));
+            dueOn = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_DUEON));
 
-                completion = (float) ((closedIssue * 1.0) / (openIssue + closedIssue));
+            viewHolder.mileName.setText(title);
+            viewHolder.mileName.setTag(number);
+            viewHolder.openClose.setText(openIssue+"/"+closedIssue);
+            viewHolder.openClose.setTag(id);
 
-                mMileId = id;
-                viewHolder.mileName.setText(title);
-                viewHolder.mileDate.setText(dueOn);
-                viewHolder.mileName.setTag(number);
-
+            String dueDate = null;
+            if (dueOn != "") {
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd HH:MM");
+                SimpleDateFormat newSdf = new SimpleDateFormat("MMM dd,yyyy hh:mm a");
+                String dueDateTemp = (dueOn.replace("T", " ")).replace("Z", "");
+                try {
+                    dueDate = newSdf.format(sdf.parse(dueDateTemp));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+            if (dueDate != null) {
+                viewHolder.mileDate.setText("Due by " + dueDate);
+            }
+            else {
+                viewHolder.mileDate.setText("No due date");
+            }
         }
 
     }
 
     @Override
     public int getItemCount() {
-        if(dataValid){
+        if (dataValid) {
             return mCursor.getCount();
-        }
-        else{
+        } else {
             return 0;
         }
     }
 
     public Cursor swapCursor(Cursor c) {
-        if(this.mCursor == c){
+        if (this.mCursor == c) {
             return null;
         }
         Cursor oldCursor = this.mCursor;
         int count = getItemCount();
         this.mCursor = c;
-        if(c!=null){
+        if (c != null) {
             dataValid = true;
-            idColumn = mCursor.getColumnIndex("_id");
             notifyDataSetChanged();
-        } else{
+        } else {
             dataValid = false;
-            idColumn = -1;
-            notifyItemRangeRemoved(0,count);
+            notifyItemRangeRemoved(0, count);
         }
         return oldCursor;
     }
 
-    public void changeCursor(Cursor c){
+    public void changeCursor(Cursor c) {
         Cursor oldCursor = swapCursor(c);
-        if(oldCursor!=null){
+        if (oldCursor != null) {
             oldCursor.close();
         }
     }

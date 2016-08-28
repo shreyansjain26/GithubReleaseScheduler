@@ -1,5 +1,6 @@
 package com.practo.githubreleasescheduler.Activities;
 
+import android.os.StrictMode;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -11,6 +12,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Adapters.PrAdapter;
@@ -20,7 +23,6 @@ import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetPrService;
-
 
 
 public class PrActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -48,10 +50,13 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
 
         Bundle extras = getIntent().getExtras();
         String milestone = extras.get("mile").toString();
-        String repo =  extras.get("repo").toString();
+        String repo = extras.get("repo").toString();
         String owner = extras.get("owner").toString();
         mileNumber = extras.get("number").toString();
         mMileId = extras.getString("mileID");
+        String open = extras.getString("open");
+        String closed = extras.getString("closed");
+        String due = extras.getString("due");
 
         Intent getDataService = new Intent(mContext, GetPrService.class);
         getDataService.putExtra("owner", owner);
@@ -60,8 +65,20 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         mContext.startService(getDataService);
 
         ((TextView) findViewById(R.id.milestone)).setText(milestone);
+        ((TextView) findViewById(R.id.dueDate)).setText(due);
+        int completion = 0;
+        int openI = Integer.parseInt(open);
+        int closedI = Integer.parseInt(closed);
+        if (openI + closedI != 0) {
+            completion = (closedI * 100) / (openI + closedI);
+        }
+        ((ProgressBar) findViewById(R.id.progressBar)).setProgress(completion);
+        ((TextView) findViewById(R.id.completion)).setText(String.valueOf(completion) + "% Complete");
+        ((TextView) findViewById(R.id.open)).setText(open + " Open");
+        ((TextView) findViewById(R.id.closed)).setText(closed + " Closed");
+        ((TextView) findViewById(R.id.lastUpdated)).setText("Last updated 11 days ago");
 
-        getSupportLoaderManager().initLoader(mId,null,this);
+        getSupportLoaderManager().initLoader(mId, null, this);
 
         showList();
 
@@ -87,7 +104,7 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
                 GitContentProvider.PR_URI,
                 null,
                 PullRequestTable.COLUMN_MILSTONEID + " = ? and " + PullRequestTable.COLUMN_MILENUMBER + " = ?",
-                new String[] {mMileId,mileNumber},
+                new String[]{mMileId, mileNumber},
                 PullRequestTable.COLUMN_ID + " DESC"
         );
 
@@ -99,6 +116,7 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         this.adapter.swapCursor(cursor);
 
     }
+
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         this.adapter.swapCursor(null);

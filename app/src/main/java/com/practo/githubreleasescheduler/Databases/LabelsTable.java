@@ -10,7 +10,6 @@ public class LabelsTable {
     public static final String TABLE_LABELS = "labels";
 
     //Columns for JOB table
-    public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_COLOR = "color";
     public static final String COLUMN_PRID = "FK_pull_request_ID";
@@ -19,11 +18,11 @@ public class LabelsTable {
     public static final String DATABASE_CREATE = "create table "+
             TABLE_LABELS +
             "(" +
-            COLUMN_ID + " integer primary key, " +
             COLUMN_NAME + " text not null, " +
             COLUMN_COLOR + " text not null, " +
-            COLUMN_PRID + " text not null " +
-            ");";
+            COLUMN_PRID + " text not null, " +
+            "PRIMARY KEY (" + COLUMN_NAME + ", " + COLUMN_PRID +
+            ") );";
 
 
     public static void onCreate(SQLiteDatabase database){
