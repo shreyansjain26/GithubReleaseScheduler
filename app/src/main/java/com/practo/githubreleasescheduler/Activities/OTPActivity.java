@@ -94,18 +94,17 @@ public class OTPActivity extends AppCompatActivity {
 
     }
 
-    private void saveAuthToken(String token, String id, String encodedUserPass){
+    private void saveAuthToken(String token, String id, String encodedUserPass) {
 
         SharedPreferences settings;
         SharedPreferences.Editor editor;
-        settings = this.getSharedPreferences("AUTHTOKEN",Context.MODE_PRIVATE);
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
 
         editor = settings.edit();
         editor.putString("authtoken", token);
         editor.putString("authID", id);
-        editor.putString("encodedUserpass", encodedUserPass);
-
-        editor.commit();
+        editor.putString("encodedUserPass", encodedUserPass);
+        editor.apply();
 
     }
 }

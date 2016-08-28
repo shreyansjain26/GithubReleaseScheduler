@@ -18,6 +18,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.practo.githubreleasescheduler.BuildConfig;
 import com.practo.githubreleasescheduler.R;
 
 import org.json.JSONArray;
@@ -39,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
 
         SharedPreferences settings;
         settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
-        String oAuthToken = settings.getString("authtoken",null);
+        String oAuthToken = settings.getString("authtoken", null);
 
         if (oAuthToken != null) {
             Intent repoPage = new Intent(this, RepoActivity.class);
@@ -87,8 +88,8 @@ public class LoginActivity extends AppCompatActivity {
 
         try {
             json.put("note", "git release claendar");
-            json.put("client_id", "37492183482f42649a5a");
-            json.put("client_secret", "3bea637dcc835e30040c33893060bf585474ce76");
+            json.put("client_id", BuildConfig.GITHUB_CLIENT_ID);
+            json.put("client_secret", BuildConfig.GITHUB_CLIENT_SECRET);
             json.put("scopes", scopes);
         } catch (Exception e) {
         }

@@ -86,7 +86,7 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
     @Override
     public void onBindViewHolder(MilesAdapter.ViewHolder viewHolder, int position) {
 
-        String id, number, title, dueOn;
+        String id, number, title, dueOn, lastUpdate;
         String openIssue, closedIssue;
 
         if (dataValid && mCursor.moveToPosition(position)) {
@@ -96,18 +96,22 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             openIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_OPENISSUE));
             closedIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_CLOSEDISSUE));
             dueOn = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_DUEON));
+            lastUpdate = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_LASTUPDATE));
 
             viewHolder.mileName.setText(title);
             viewHolder.mileName.setTag(number);
-            viewHolder.openClose.setText(openIssue+"/"+closedIssue);
+            viewHolder.openClose.setText(openIssue + "/" + closedIssue);
             viewHolder.openClose.setTag(id);
 
             String dueDate = null;
+            String lastUpdateFormated = null;
             if (dueOn != "") {
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 SimpleDateFormat newSdf = new SimpleDateFormat("MMM dd,yyyy HH:mm a");
                 String dueDateTemp = (dueOn.replace("T", " ")).replace("Z", "");
+                String updateDateTemp = (lastUpdate.replace("T", " ")).replace("Z", "");
                 try {
+                    lastUpdateFormated = newSdf.format(sdf.parse(updateDateTemp));
                     dueDate = newSdf.format(sdf.parse(dueDateTemp));
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -115,10 +119,10 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             }
             if (dueDate != null) {
                 viewHolder.mileDate.setText("Due by " + dueDate);
-            }
-            else {
+            } else {
                 viewHolder.mileDate.setText("No due date");
             }
+            viewHolder.mileDate.setTag("Last Updated on " + lastUpdateFormated);
         }
 
     }

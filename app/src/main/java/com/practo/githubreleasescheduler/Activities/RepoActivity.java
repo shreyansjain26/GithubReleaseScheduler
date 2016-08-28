@@ -1,5 +1,7 @@
 package com.practo.githubreleasescheduler.Activities;
 
+import android.content.ContentProvider;
+import android.content.ContentResolver;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.support.v4.content.CursorLoader;
@@ -11,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -24,12 +27,15 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.Adapters.RepoAdapter;
+import com.practo.githubreleasescheduler.BuildConfig;
+import com.practo.githubreleasescheduler.Databases.DatabaseHelper;
 import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetRepoService;
 
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,38 +104,42 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
     private void logout() {
         final SharedPreferences settings;
         settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
+        final String oAuthToken = settings.getString("authtoken", null);
         final String authId = settings.getString("authID", null);
-        final String userPass = settings.getString("encodedUserPass", null);
+
+        String keyString = BuildConfig.GITHUB_CLIENT_ID + ":" + BuildConfig.GITHUB_CLIENT_SECRET;
+
+        String userPass = null;
+        try {
+            userPass = "Basic " + Base64.encodeToString(keyString.getBytes("UTF-8"), Base64.NO_WRAP);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest req;
-        String url = "https://api.github.com/authorizations/" + authId;
+        String url = "https://api.github.com/applications/" + BuildConfig.GITHUB_CLIENT_ID + "/tokens/" + oAuthToken;
         Log.d("LOGOUT_url", url);
+        Log.d("userpass",userPass);
+        final String finalUserPass = userPass;
         req = new StringRequest(Request.Method.DELETE, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-
-                final SharedPreferences.Editor editor;
-                editor = settings.edit();
-                editor.clear();
-                editor.commit();
-
-                Intent intent = new Intent(RepoActivity.this, LoginActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                RepoActivity.this.startActivity(intent);
-
+                clearStoredData();
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                clearStoredData();
                 error.printStackTrace();
             }
         }) {
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String> params = new HashMap<String, String>();
-                params.put("Authorization", userPass);
+                params.put("Authorization", finalUserPass);
+                params.put("Accept", "application/json");
                 return params;
             }
         };
@@ -161,6 +171,25 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoaderReset(Loader<Cursor> loader) {
         this.adapter.swapCursor(null);
+    }
+
+    public void clearStoredData() {
+        final SharedPreferences settings;
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
+        final SharedPreferences.Editor editor;
+        editor = settings.edit();
+        editor.clear();
+        editor.apply();
+
+        ContentResolver resolver = getApplicationContext().getContentResolver();
+        resolver.delete(GitContentProvider.REPO_URI, null, null);
+        resolver.delete(GitContentProvider.MILES_URI, null, null);
+        resolver.delete(GitContentProvider.PR_URI, null, null);
+        resolver.delete(GitContentProvider.LABELS_URI, null, null);
+
+        Intent intent = new Intent(RepoActivity.this, LoginActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        RepoActivity.this.startActivity(intent);
     }
 
 }

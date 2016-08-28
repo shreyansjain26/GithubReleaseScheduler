@@ -72,6 +72,7 @@ public class GetMilesService extends IntentService {
                         value[i].put(MilestoneTable.COLUMN_NUMBER, Integer.toString(mile.getInt("number")));
                         value[i].put(MilestoneTable.COLUMN_NAME, mile.getString("title"));
                         value[i].put(MilestoneTable.COLUMN_DUEON, mile.getString("due_on"));
+                        value[i].put(MilestoneTable.COLUMN_LASTUPDATE,mile.getString("updated_at"));
                         value[i].put(MilestoneTable.COLUMN_DESCRIPTION, mile.getString("description"));
                         value[i].put(MilestoneTable.COLUMN_OPENISSUE, Integer.toString(mile.getInt("open_issues")));
                         value[i].put(MilestoneTable.COLUMN_CLOSEDISSUE, Integer.toString(mile.getInt("closed_issues")));
