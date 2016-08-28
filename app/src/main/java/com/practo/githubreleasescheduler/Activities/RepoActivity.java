@@ -121,7 +121,7 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         StringRequest req;
         String url = "https://api.github.com/applications/" + BuildConfig.GITHUB_CLIENT_ID + "/tokens/" + oAuthToken;
         Log.d("LOGOUT_url", url);
-        Log.d("userpass",userPass);
+        Log.d("userpass", userPass);
         final String finalUserPass = userPass;
         req = new StringRequest(Request.Method.DELETE, url, new Response.Listener<String>() {
             @Override
@@ -180,7 +180,6 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         editor = settings.edit();
         editor.clear();
         editor.apply();
-
         ContentResolver resolver = getApplicationContext().getContentResolver();
         resolver.delete(GitContentProvider.REPO_URI, null, null);
         resolver.delete(GitContentProvider.MILES_URI, null, null);
@@ -188,8 +187,8 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         resolver.delete(GitContentProvider.LABELS_URI, null, null);
 
         Intent intent = new Intent(RepoActivity.this, LoginActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         RepoActivity.this.startActivity(intent);
+        finish();
     }
 
 }
