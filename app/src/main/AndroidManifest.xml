@@ -3,6 +3,7 @@
     package="com.practo.githubreleasescheduler">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
         android:allowBackup="true"
@@ -39,7 +40,18 @@
             android:name=".Services.GetPrService"
             android:exported="false" />
 
-        <activity android:name=".Activities.PrDescriptionActivity"></activity>
+        <activity android:name=".Activities.PrDescriptionActivity" />
+
+        <receiver
+            android:name=".Recievers.MilestoneAlarmReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="ALARM" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+
+        </receiver>
     </application>
 
 </manifest>

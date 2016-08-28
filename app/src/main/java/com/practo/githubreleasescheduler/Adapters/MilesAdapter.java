@@ -104,8 +104,8 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
 
             String dueDate = null;
             if (dueOn != "") {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-mm-dd HH:MM");
-                SimpleDateFormat newSdf = new SimpleDateFormat("MMM dd,yyyy hh:mm a");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat newSdf = new SimpleDateFormat("MMM dd,yyyy HH:mm a");
                 String dueDateTemp = (dueOn.replace("T", " ")).replace("Z", "");
                 try {
                     dueDate = newSdf.format(sdf.parse(dueDateTemp));
