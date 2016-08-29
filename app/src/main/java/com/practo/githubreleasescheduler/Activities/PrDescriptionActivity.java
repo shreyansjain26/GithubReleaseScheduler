@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.support.v4.app.LoaderManager;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +21,8 @@ import com.practo.githubreleasescheduler.Databases.LabelsTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 
-public class PrDescriptionActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PrDescriptionActivity extends AppCompatActivity
+        implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private String oAuthToken;
     private int mId = 126;
@@ -52,13 +52,13 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
         ((TextView) findViewById(R.id.pullRequest)).setText(prTitle);
         ((TextView) findViewById(R.id.assignee)).setText(prAssignee);
 
-        getSupportLoaderManager().initLoader(mId,null,this);
+        getSupportLoaderManager().initLoader(mId, null, this);
     }
 
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -69,7 +69,7 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
                 GitContentProvider.LABELS_URI,
                 null,
                 LabelsTable.COLUMN_PRID + " = ?",
-                new String[] {prId},
+                new String[]{prId},
                 null
         );
     }
@@ -80,29 +80,36 @@ public class PrDescriptionActivity extends AppCompatActivity implements LoaderMa
         cursor.moveToFirst();
         TableLayout table = (TableLayout) findViewById(R.id.labelTable);
         while (!cursor.isAfterLast()) {
-            String labelAName = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_NAME));
-            String labelAColor = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_COLOR));
-            String labelAPrId = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_PRID));
-            Log.d("LabelA",labelAPrId);
-            Log.d(labelAName,labelAColor);
+            String labelAName = cursor.getString(cursor
+                    .getColumnIndexOrThrow(LabelsTable.COLUMN_NAME));
+            String labelAColor = cursor.getString(cursor
+                    .getColumnIndexOrThrow(LabelsTable.COLUMN_COLOR));
+            String labelAPrId = cursor.getString(cursor
+                    .getColumnIndexOrThrow(LabelsTable.COLUMN_PRID));
+            Log.d("LabelA", labelAPrId);
+            Log.d(labelAName, labelAColor);
 
-            TableRow row = (TableRow) LayoutInflater.from(this).inflate(R.layout.rows_label, null);
+            TableRow row = (TableRow) LayoutInflater
+                    .from(this).inflate(R.layout.rows_label, null);
             TextView labelA = (TextView) row.findViewById(R.id.labelA);
             labelA.setText(labelAName);
-            labelA.setBackgroundColor(Color.parseColor("#"+labelAColor));
+            labelA.setBackgroundColor(Color.parseColor("#" + labelAColor));
 
             cursor.moveToNext();
 
             if (!cursor.isAfterLast()) {
-                String labelBName = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_NAME));
-                String labelBColor = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_COLOR));
-                String labelBPrId = cursor.getString(cursor.getColumnIndexOrThrow(LabelsTable.COLUMN_PRID));
-                Log.d("labelB",labelBPrId);
+                String labelBName = cursor.getString(cursor
+                        .getColumnIndexOrThrow(LabelsTable.COLUMN_NAME));
+                String labelBColor = cursor.getString(cursor
+                        .getColumnIndexOrThrow(LabelsTable.COLUMN_COLOR));
+                String labelBPrId = cursor.getString(cursor
+                        .getColumnIndexOrThrow(LabelsTable.COLUMN_PRID));
+                Log.d("labelB", labelBPrId);
                 Log.d(labelAName, labelBColor);
 
                 TextView labelB = (TextView) row.findViewById(R.id.labelB);
                 labelB.setText(labelBName);
-                labelB.setBackgroundColor(Color.parseColor("#"+labelBColor));
+                labelB.setBackgroundColor(Color.parseColor("#" + labelBColor));
 
                 cursor.moveToNext();
             }

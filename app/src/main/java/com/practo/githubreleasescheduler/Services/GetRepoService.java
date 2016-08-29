@@ -50,30 +50,36 @@ public class GetRepoService extends IntentService {
         JsonArrayRequest req;
         String pageUrl = url + Integer.toString(page);
 
-        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                int length = response.length();
-                ContentValues[] value = new ContentValues[length];
-                for (int i = 0; i < length; i++) {
-                    try {
-                        JSONObject repo = response.getJSONObject(i);
-                        value[i] = new ContentValues();
-                        value[i].put(RepositoryTable.COLUMN_ID, Integer.toString(repo.getInt("id")));
-                        value[i].put(RepositoryTable.COLUMN_NAME, repo.getString("name"));
-                        value[i].put(RepositoryTable.COLUMN_OWNER, (repo.getJSONObject("owner")).getString("login"));
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null,
+                new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray response) {
+                        int length = response.length();
+                        ContentValues[] value = new ContentValues[length];
+                        for (int i = 0; i < length; i++) {
+                            try {
+                                JSONObject repo = response.getJSONObject(i);
+                                value[i] = new ContentValues();
+                                value[i].put(RepositoryTable.COLUMN_ID,
+                                        Integer.toString(repo.getInt("id")));
+                                value[i].put(RepositoryTable.COLUMN_NAME,
+                                        repo.getString("name"));
+                                value[i].put(RepositoryTable.COLUMN_OWNER,
+                                        (repo.getJSONObject("owner"))
+                                                .getString("login"));
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+                        getApplicationContext().getContentResolver()
+                                .bulkInsert(GitContentProvider.REPO_URI, value);
+
+                        if (length != 0 && length == 100) {
+                            getRepo(page + 1);
+                        }
                     }
-
-                }
-                getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.REPO_URI, value);
-
-                if (length != 0 && length == 100) {
-                    getRepo(page + 1);
-                }
-            }
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 error.printStackTrace();
@@ -93,8 +99,7 @@ public class GetRepoService extends IntentService {
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        SharedPreferences.Editor editor;
-        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         mOAuthToken = settings.getString("authtoken", null);
     }
 }

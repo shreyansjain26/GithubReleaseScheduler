@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         SharedPreferences settings;
-        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         String oAuthToken = settings.getString("authtoken", null);
 
         if (oAuthToken != null) {
@@ -61,7 +61,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void saveAuthToken(String token, String id, String encodedUserPass) {
+    private void saveAuthToken(String token, String id,
+                               String encodedUserPass) {
 
         SharedPreferences settings;
         SharedPreferences.Editor editor;
@@ -77,10 +78,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login() {
         mLoginButton.setEnabled(false);
-        final String username = String.valueOf(((EditText) findViewById(R.id.username)).getText());
-        String password = String.valueOf(((EditText) findViewById(R.id.password)).getText());
+        final String username = String.valueOf(
+                ((EditText) findViewById(R.id.username)).getText());
+        String password = String.valueOf(
+                ((EditText) findViewById(R.id.password)).getText());
         String keyString = username + ":" + password;
-        final String encodedJava8 = Base64.encodeToString(keyString.getBytes(), Base64.DEFAULT);
+        final String encodedJava8 = Base64.encodeToString(
+                keyString.getBytes(), Base64.DEFAULT);
 
         String url = "https://api.github.com/authorizations";
         final JSONObject json = new JSONObject();
@@ -99,34 +103,41 @@ public class LoginActivity extends AppCompatActivity {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest req;
 
-        req = new JsonObjectRequest(Request.Method.POST, url, json, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                try {
-                    saveAuthToken(response.getString("token"), Integer.toString(response.getInt("id")), "Basic " + encodedJava8);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-                Intent repoIntent = new Intent(LoginActivity.this, RepoActivity.class);
-                LoginActivity.this.startActivity(repoIntent);
-                finish();
-            }
+        req = new JsonObjectRequest(Request.Method.POST, url, json,
+                new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        try {
+                            saveAuthToken(response.getString("token"),
+                                    Integer.toString(response.getInt("id")),
+                                    "Basic " + encodedJava8);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                        Intent repoIntent = new Intent(LoginActivity.this,
+                                RepoActivity.class);
+                        LoginActivity.this.startActivity(repoIntent);
+                        finish();
+                    }
 
-        }, new Response.ErrorListener() {
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 mLoginButton.setEnabled(true);
                 if (error.networkResponse.statusCode == 401 &&
-                        (error.networkResponse.headers.get("X-GitHub-OTP") != null)) {
+                        (error.networkResponse.headers
+                                .get("X-GitHub-OTP") != null)) {
 
-                    Intent OTPIntent = new Intent(LoginActivity.this, OTPActivity.class);
+                    Intent OTPIntent = new Intent(LoginActivity.this,
+                            OTPActivity.class);
 
                     OTPIntent.putExtra("username", username);
                     OTPIntent.putExtra("AuthEncoded", encodedJava8);
                     OTPIntent.putExtra("authBody", json.toString());
                     LoginActivity.this.startActivity(OTPIntent);
                 } else {
-                    ((TextView) findViewById(R.id.here)).setText("wrong username or password");
+                    ((TextView) findViewById(R.id.here))
+                            .setText("wrong username or password");
                 }
 
             }

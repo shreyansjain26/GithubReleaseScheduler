@@ -1,37 +1,31 @@
 package com.practo.githubreleasescheduler.Activities;
 
-import android.os.StrictMode;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Adapters.PrAdapter;
-import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.Databases.PullRequestTable;
-import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetPrService;
 
 
-public class PrActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class PrActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
-    //private Context mContext;
     private String oAuthToken;
-    //private Cursor mCursor;
     private int mId = 125;
     private String mMileId;
     private PrAdapter adapter;
@@ -43,7 +37,6 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         setContentView(R.layout.activity_pr);
         getSupportActionBar().setTitle("Pull Requests");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //mContext = getApplicationContext();
         setoAuthToken();
 
         if (oAuthToken == null) {
@@ -78,7 +71,8 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
             completion = (closedI * 100) / (openI + closedI);
         }
         ((ProgressBar) findViewById(R.id.progressBar)).setProgress(completion);
-        ((TextView) findViewById(R.id.completion)).setText(String.valueOf(completion) + "% Complete");
+        ((TextView) findViewById(R.id.completion))
+                .setText(String.valueOf(completion) + "% Complete");
         ((TextView) findViewById(R.id.open)).setText(open + " Open");
         ((TextView) findViewById(R.id.closed)).setText(closed + " Closed");
         ((TextView) findViewById(R.id.lastUpdated)).setText(lastUpdate);
@@ -98,7 +92,6 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        SharedPreferences.Editor editor;
         settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
     }
@@ -108,9 +101,11 @@ public class PrActivity extends AppCompatActivity implements LoaderManager.Loade
         CursorLoader loader = new CursorLoader(this,
                 GitContentProvider.PR_URI,
                 null,
-                PullRequestTable.COLUMN_MILSTONEID + " = ? and " + PullRequestTable.COLUMN_MILENUMBER + " = ?",
+                PullRequestTable.COLUMN_MILSTONEID +
+                        " = ? and " +
+                        PullRequestTable.COLUMN_MILENUMBER + " = ?",
                 new String[]{mMileId, mileNumber},
-                PullRequestTable.COLUMN_ID + " DESC"
+                PullRequestTable.COLUMN_NAME + " ASC"
         );
 
         return loader;

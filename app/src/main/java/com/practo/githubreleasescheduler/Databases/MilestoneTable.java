@@ -2,14 +2,10 @@ package com.practo.githubreleasescheduler.Databases;
 
 import android.database.sqlite.SQLiteDatabase;
 
-/**
- * Created by shreyans on 24/08/16.
- */
+
 public class MilestoneTable {
-    //Database JOB table
     public static final String TABLE_MILESTONES = "milestones";
 
-    //Columns for JOB table
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_NAME = "name";
     public static final String COLUMN_NUMBER = "number";
@@ -20,7 +16,6 @@ public class MilestoneTable {
     public static final String COLUMN_REPOID = "FK_repoID";
     public static final String COLUMN_LASTUPDATE = "last_update";
 
-    //Database Creation statement
     public static final String DATABASE_CREATE = "create table " +
             TABLE_MILESTONES +
             "(" +
@@ -40,8 +35,7 @@ public class MilestoneTable {
         database.execSQL(DATABASE_CREATE);
     }
 
-    public static void onUpgrade(SQLiteDatabase database,
-                                 int olderVersion, int newVersion) {
+    public static void onUpgrade(SQLiteDatabase database) {
         database.execSQL("DROP TABLE IF EXIST " + TABLE_MILESTONES);
         onCreate(database);
     }

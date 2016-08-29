@@ -1,10 +1,8 @@
 package com.practo.githubreleasescheduler.Activities;
 
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.content.Intent;
 import android.support.v4.content.Loader;
@@ -29,7 +27,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.practo.githubreleasescheduler.Adapters.RepoAdapter;
 import com.practo.githubreleasescheduler.BuildConfig;
-import com.practo.githubreleasescheduler.Databases.DatabaseHelper;
 import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
@@ -40,7 +37,8 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RepoActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
+public class RepoActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
     private String oAuthToken;
     private RepoAdapter adapter;
     private int mId = 123;
@@ -80,7 +78,8 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN",
+                Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -112,11 +111,14 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         final String oAuthToken = settings.getString("authtoken", null);
         final String authId = settings.getString("authID", null);
 
-        String keyString = BuildConfig.GITHUB_CLIENT_ID + ":" + BuildConfig.GITHUB_CLIENT_SECRET;
+        String keyString = BuildConfig.GITHUB_CLIENT_ID + ":" +
+                BuildConfig.GITHUB_CLIENT_SECRET;
 
         String userPass = null;
         try {
-            userPass = "Basic " + Base64.encodeToString(keyString.getBytes("UTF-8"), Base64.NO_WRAP);
+            userPass = "Basic " +
+                    Base64.encodeToString(keyString.getBytes("UTF-8"),
+                            Base64.NO_WRAP);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
@@ -124,16 +126,18 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
         RequestQueue queue = Volley.newRequestQueue(this);
 
         StringRequest req;
-        String url = "https://api.github.com/applications/" + BuildConfig.GITHUB_CLIENT_ID + "/tokens/" + oAuthToken;
+        String url = "https://api.github.com/applications/" +
+                BuildConfig.GITHUB_CLIENT_ID + "/tokens/" + oAuthToken;
         Log.d("LOGOUT_url", url);
         Log.d("userpass", userPass);
         final String finalUserPass = userPass;
-        req = new StringRequest(Request.Method.DELETE, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                clearStoredData();
-            }
-        }, new Response.ErrorListener() {
+        req = new StringRequest(Request.Method.DELETE, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        clearStoredData();
+                    }
+                }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 clearStoredData();
@@ -161,7 +165,7 @@ public class RepoActivity extends AppCompatActivity implements LoaderManager.Loa
                 null,
                 null,
                 null,
-                RepositoryTable.COLUMN_ID + " DESC"
+                RepositoryTable.COLUMN_NAME + " ASC"
         );
 
         return loader;

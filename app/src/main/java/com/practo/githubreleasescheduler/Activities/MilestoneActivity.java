@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.support.v4.app.NavUtils;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -16,24 +15,19 @@ import android.view.MenuItem;
 
 
 import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
-import com.practo.githubreleasescheduler.Classes.Milestone;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
-import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetMilesService;
 
-import java.util.ArrayList;
 
+public class MilestoneActivity extends AppCompatActivity implements
+        LoaderManager.LoaderCallbacks<Cursor> {
 
-public class MilestoneActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
-
-    //private Context mContext;
     private String oAuthToken;
     private String repo;
     private String owner;
     private String repoId;
-    //private Cursor mCursor;
     private MilesAdapter adapter;
     private int mId = 124;
 
@@ -44,7 +38,6 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
         setContentView(R.layout.activity_milestone);
         getSupportActionBar().setTitle("Milestones");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //mContext = getApplicationContext();
         setoAuthToken();
 
         if (oAuthToken == null) {
@@ -71,7 +64,6 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
 
     public void showList() {
         RecyclerView rvMiles = (RecyclerView) findViewById(R.id.rvMiles);
-        //miles = Milestone.createMilestonesList(data);
         adapter = new MilesAdapter(repo, owner, null);
         rvMiles.setAdapter(adapter);
         rvMiles.setLayoutManager(new LinearLayoutManager(this));
@@ -79,8 +71,7 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
 
     private void setoAuthToken() {
         SharedPreferences settings;
-        SharedPreferences.Editor editor;
-        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE); //1
+        settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         oAuthToken = settings.getString("authtoken", null);
     }
 
@@ -91,7 +82,7 @@ public class MilestoneActivity extends AppCompatActivity implements LoaderManage
                 null,
                 MilestoneTable.COLUMN_REPOID + " = ?",
                 new String[]{repoId},
-                MilestoneTable.COLUMN_ID + " DESC"
+                MilestoneTable.COLUMN_NAME + " ASC"
         );
 
         return loader;

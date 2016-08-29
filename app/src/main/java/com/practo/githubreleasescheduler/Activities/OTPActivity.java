@@ -27,21 +27,17 @@ import java.util.Map;
 
 public class OTPActivity extends AppCompatActivity {
 
-    //private Context mContext;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_otp);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        //mContext = getApplicationContext();
         final String url = "https://api.github.com/authorizations";
         Bundle extras = getIntent().getExtras();
         JSONObject authBody = null;
-        String username;
         String authEncoded = null;
-        if (extras !=null) {
-            username = extras.getString("username");
+        if (extras != null) {
             authEncoded = extras.getString("AuthEncoded");
             try {
                 authBody = new JSONObject(extras.getString("authBody"));
@@ -54,36 +50,43 @@ public class OTPActivity extends AppCompatActivity {
 
         Button loginButton = (Button) findViewById(R.id.login);
 
-        loginButton.setOnClickListener( new View.OnClickListener() {
+        loginButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                final String otp = String.valueOf(((TextView) findViewById(R.id.otp)).getText());
+                final String otp = String.valueOf(
+                        ((TextView) findViewById(R.id.otp)).getText());
                 RequestQueue queue = Volley.newRequestQueue(OTPActivity.this);
                 JsonObjectRequest req = null;
 
-                req = new JsonObjectRequest(Request.Method.POST, url, finalAuthBody, new Response.Listener<JSONObject>() {
+                req = new JsonObjectRequest(Request.Method.POST, url,
+                        finalAuthBody, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject response) {
                         try {
                             saveAuthToken(response.getString("token"),
-                                    Integer.toString(response.getInt("id")),"Basic " + finalAuthEncoded );
+                                    Integer.toString(response.getInt("id")),
+                                    "Basic " + finalAuthEncoded);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-                        Intent repoIntent = new Intent(OTPActivity.this,RepoActivity.class);
+                        Intent repoIntent = new Intent(OTPActivity.this,
+                                RepoActivity.class);
                         repoIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                         OTPActivity.this.startActivity(repoIntent);
                     }
                 }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        ((TextView) findViewById(R.id.here)).setText("wrong OTP");
+                        ((TextView) findViewById(R.id.here))
+                                .setText("wrong OTP");
                     }
                 }) {
                     @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
+                    public Map<String, String> getHeaders() throws
+                            AuthFailureError {
                         Map<String, String> params = new HashMap<String, String>();
-                        params.put("Authorization", "Basic " + finalAuthEncoded);
+                        params.put("Authorization",
+                                "Basic " + finalAuthEncoded);
                         params.put("X-GitHub-OTP", otp);
                         return params;
                     }
@@ -96,7 +99,8 @@ public class OTPActivity extends AppCompatActivity {
 
     }
 
-    private void saveAuthToken(String token, String id, String encodedUserPass) {
+    private void saveAuthToken(String token, String id,
+                               String encodedUserPass) {
 
         SharedPreferences settings;
         SharedPreferences.Editor editor;

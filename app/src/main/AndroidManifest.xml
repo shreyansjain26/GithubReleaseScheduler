@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.practo.githubreleasescheduler">
+          package="com.practo.githubreleasescheduler">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:allowBackup="true"
@@ -11,47 +11,47 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
         <activity android:name=".Activities.LoginActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".Activities.OTPActivity" />
-        <activity android:name=".Activities.RepoActivity" />
-        <activity android:name=".Activities.MilestoneActivity" />
-        <activity android:name=".Activities.PrActivity" />
+        <activity android:name=".Activities.OTPActivity"/>
+        <activity android:name=".Activities.RepoActivity"/>
+        <activity android:name=".Activities.MilestoneActivity"/>
+        <activity android:name=".Activities.PrActivity"/>
 
         <provider
             android:name=".Providers.GitContentProvider"
             android:authorities="com.practo.grs.provider"
             android:enabled="true"
-            android:exported="false" />
+            android:exported="false"/>
 
         <service
             android:name=".Services.GetRepoService"
-            android:exported="false" />
+            android:exported="false"/>
         <service
             android:name=".Services.GetMilesService"
-            android:exported="false" />
+            android:exported="false"/>
         <service
             android:name=".Services.GetPrService"
-            android:exported="false" />
+            android:exported="false"/>
 
-        <activity android:name=".Activities.PrDescriptionActivity" />
+        <activity android:name=".Activities.PrDescriptionActivity"/>
 
         <receiver
             android:name=".Recievers.MilestoneAlarmReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
-                <action android:name="ALARM" />
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
+                <action android:name="ALARM"/>
 
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

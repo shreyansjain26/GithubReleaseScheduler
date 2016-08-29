@@ -14,9 +14,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.practo.githubreleasescheduler.Classes.PullRequest;
 import com.practo.githubreleasescheduler.Databases.LabelsTable;
-import com.practo.githubreleasescheduler.Databases.MilestoneTable;
 import com.practo.githubreleasescheduler.Databases.PullRequestTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 

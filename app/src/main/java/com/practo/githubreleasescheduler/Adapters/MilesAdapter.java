@@ -1,10 +1,8 @@
 package com.practo.githubreleasescheduler.Adapters;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,12 +16,11 @@ import com.practo.githubreleasescheduler.Utils.Utils;
 import java.text.SimpleDateFormat;
 
 
-/**
- * Created by shreyans on 22/08/16.
- */
-public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> {
+public class MilesAdapter extends
+        RecyclerView.Adapter<MilesAdapter.ViewHolder> {
 
-    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class ViewHolder extends RecyclerView.ViewHolder implements
+            View.OnClickListener {
 
         public TextView mileName;
         public TextView mileDate;
@@ -72,26 +69,37 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
         mCursor = cursor;
     }
 
-    public MilesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public MilesAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                      int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View milesView = inflater.inflate(R.layout.list_milestone, parent, false);
+        View milesView = inflater.inflate(R.layout.list_milestone,
+                parent, false);
         return new ViewHolder(milesView);
     }
 
     @Override
-    public void onBindViewHolder(MilesAdapter.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(MilesAdapter.ViewHolder viewHolder,
+                                 int position) {
 
         String id, number, title, dueOn, lastUpdate;
         String openIssue, closedIssue;
 
-        if (!Utils.isCursorEmpty(mCursor) && mCursor.moveToPosition(position)) {
-            id = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_ID));
-            number = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NUMBER));
-            title = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_NAME));
-            openIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_OPENISSUE));
-            closedIssue = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_CLOSEDISSUE));
-            dueOn = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_DUEON));
-            lastUpdate = mCursor.getString(mCursor.getColumnIndexOrThrow(MilestoneTable.COLUMN_LASTUPDATE));
+        if (!Utils.isCursorEmpty(mCursor) &&
+                mCursor.moveToPosition(position)) {
+            id = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_ID));
+            number = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_NUMBER));
+            title = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_NAME));
+            openIssue = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_OPENISSUE));
+            closedIssue = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_CLOSEDISSUE));
+            dueOn = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_DUEON));
+            lastUpdate = mCursor.getString(mCursor
+                    .getColumnIndexOrThrow(MilestoneTable.COLUMN_LASTUPDATE));
 
             viewHolder.mileName.setText(title);
             viewHolder.mileName.setTag(number);
@@ -101,12 +109,16 @@ public class MilesAdapter extends RecyclerView.Adapter<MilesAdapter.ViewHolder> 
             String dueDate = null;
             String lastUpdateFormated = null;
             if (dueOn != "") {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                SimpleDateFormat newSdf = new SimpleDateFormat("MMM dd,yyyy HH:mm a");
+                SimpleDateFormat sdf =
+                        new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                SimpleDateFormat newSdf =
+                        new SimpleDateFormat("MMM dd,yyyy HH:mm a");
                 String dueDateTemp = (dueOn.replace("T", " ")).replace("Z", "");
-                String updateDateTemp = (lastUpdate.replace("T", " ")).replace("Z", "");
+                String updateDateTemp =
+                        (lastUpdate.replace("T", " ")).replace("Z", "");
                 try {
-                    lastUpdateFormated = newSdf.format(sdf.parse(updateDateTemp));
+                    lastUpdateFormated = newSdf
+                            .format(sdf.parse(updateDateTemp));
                     dueDate = newSdf.format(sdf.parse(dueDateTemp));
                 } catch (Exception e) {
                     e.printStackTrace();

@@ -46,7 +46,8 @@ public class GetMilesService extends IntentService {
             String repo = extras.getString("repo");
             String owner = extras.getString("owner");
             String repoId = extras.getString("repoId");
-            url = "https://api.github.com/repos/" + owner + "/" + repo + "/milestones?per_page=100&page=";
+            url = "https://api.github.com/repos/" + owner +
+                    "/" + repo + "/milestones?per_page=100&page=";
 
             getMiles(repoId, 1);
         }
@@ -56,7 +57,8 @@ public class GetMilesService extends IntentService {
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonArrayRequest req;
         String pageUrl = url + Integer.toString(page);
-        req = new JsonArrayRequest(Request.Method.GET, pageUrl, null, new Response.Listener<JSONArray>() {
+        req = new JsonArrayRequest(Request.Method.GET, pageUrl,
+                null, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 int length = response.length();
@@ -65,25 +67,36 @@ public class GetMilesService extends IntentService {
                     try {
                         JSONObject mile = response.getJSONObject(i);
                         value[i] = new ContentValues();
-                        value[i].put(MilestoneTable.COLUMN_ID, Integer.toString(mile.getInt("id")));
-                        value[i].put(MilestoneTable.COLUMN_NUMBER, Integer.toString(mile.getInt("number")));
-                        value[i].put(MilestoneTable.COLUMN_NAME, mile.getString("title"));
-                        value[i].put(MilestoneTable.COLUMN_DUEON, mile.getString("due_on"));
-                        value[i].put(MilestoneTable.COLUMN_LASTUPDATE, mile.getString("updated_at"));
-                        value[i].put(MilestoneTable.COLUMN_DESCRIPTION, mile.getString("description"));
-                        value[i].put(MilestoneTable.COLUMN_OPENISSUE, Integer.toString(mile.getInt("open_issues")));
-                        value[i].put(MilestoneTable.COLUMN_CLOSEDISSUE, Integer.toString(mile.getInt("closed_issues")));
+                        value[i].put(MilestoneTable.COLUMN_ID,
+                                Integer.toString(mile.getInt("id")));
+                        value[i].put(MilestoneTable.COLUMN_NUMBER,
+                                Integer.toString(mile.getInt("number")));
+                        value[i].put(MilestoneTable.COLUMN_NAME,
+                                mile.getString("title"));
+                        value[i].put(MilestoneTable.COLUMN_DUEON,
+                                mile.getString("due_on"));
+                        value[i].put(MilestoneTable.COLUMN_LASTUPDATE,
+                                mile.getString("updated_at"));
+                        value[i].put(MilestoneTable.COLUMN_DESCRIPTION,
+                                mile.getString("description"));
+                        value[i].put(MilestoneTable.COLUMN_OPENISSUE,
+                                Integer.toString(mile.getInt("open_issues")));
+                        value[i].put(MilestoneTable.COLUMN_CLOSEDISSUE,
+                                Integer.toString(mile.getInt("closed_issues")));
                         value[i].put(MilestoneTable.COLUMN_REPOID, repoId);
 
                         if (!mile.getString("due_on").equals(null)) {
-                            setAlarm(mile.getInt("id"), mile.getString("title"), mile.getString("due_on"));
+                            setAlarm(mile.getInt("id"),
+                                    mile.getString("title"),
+                                    mile.getString("due_on"));
                         }
 
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-                getApplicationContext().getContentResolver().bulkInsert(GitContentProvider.MILES_URI, value);
+                getApplicationContext().getContentResolver()
+                        .bulkInsert(GitContentProvider.MILES_URI, value);
 
                 if (length != 0 && length == 100) {
                     getMiles(repoId, page + 1);
@@ -109,9 +122,11 @@ public class GetMilesService extends IntentService {
 
     private void setAlarm(int id, String title, String date) {
         Intent intent = new Intent("ALARM");
-        if (PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_NO_CREATE) != null) {
+        if (PendingIntent.getBroadcast(this, id, intent,
+                PendingIntent.FLAG_NO_CREATE) != null) {
             if (!date.equals(getAlarmTimeById(id))) {
-                PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_UPDATE_CURRENT).cancel();
+                PendingIntent.getBroadcast(this, id, intent,
+                        PendingIntent.FLAG_UPDATE_CURRENT).cancel();
                 setAlarmTimeById(id, null);
             } else {
                 return;
@@ -128,7 +143,8 @@ public class GetMilesService extends IntentService {
             if (dueDate.before(new Date())) return;
 
             intent.putExtra("title", title);
-            PendingIntent sender = PendingIntent.getBroadcast(this, id, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            PendingIntent sender = PendingIntent.getBroadcast(this, id,
+                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarm1 = (AlarmManager) getSystemService(ALARM_SERVICE);
             alarm1.set(AlarmManager.RTC_WAKEUP, dueDate.getTime(), sender);
             setAlarmTimeById(id, date);

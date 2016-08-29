@@ -1,30 +1,25 @@
 package com.practo.githubreleasescheduler.Adapters;
 
-import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Activities.MilestoneActivity;
-import com.practo.githubreleasescheduler.Classes.Repository;
 import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Utils.Utils;
 
-import java.util.List;
 
-/**
- * Created by shreyans on 22/08/16.
- */
+
 public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements
+            View.OnClickListener {
 
         public TextView repoName;
         public TextView repoOwner;
@@ -43,7 +38,8 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
             String repo = repoName.getText().toString();
             String owner = repoOwner.getText().toString();
             String id = repoName.getTag().toString();
-            Intent milPage = new Intent(view.getContext(), MilestoneActivity.class);
+            Intent milPage = new Intent(view.getContext(),
+                    MilestoneActivity.class);
             milPage.putExtra("repo", repo);
             milPage.putExtra("owner", owner);
             milPage.putExtra("repoId", id);
@@ -57,7 +53,8 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
         mCursor = cursor;
     }
 
-    public RepoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public RepoAdapter.ViewHolder onCreateViewHolder(ViewGroup parent,
+                                                     int viewType) {
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View repoView = inflater.inflate(R.layout.list_repository, parent, false);
         return new ViewHolder(repoView);
