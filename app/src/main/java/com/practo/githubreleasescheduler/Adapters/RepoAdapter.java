@@ -86,6 +86,14 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
             viewHolder.repoName.setText(name);
             viewHolder.repoName.setTag(id);
             viewHolder.repoOwner.setText(owner);
+
+            SharedPreferences pref;
+            pref = mContext.getSharedPreferences("FAVOURITES", Context.MODE_PRIVATE);
+            Set<String> favList = pref.getStringSet("favList", new HashSet<String>());
+            if (favList.contains(id)) {
+                viewHolder.repoFav.setBackgroundResource(R.drawable.star_selected);
+            }
+
             viewHolder.repoFav.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -96,11 +104,11 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
                     Set<String> favList = pref.getStringSet("favList", new HashSet<String>());
                     if (!favList.contains(id)){
                         favList.add(id);
-                        //viewHolder.repoFav.setBackground(R.drawable.star_selected);
+                        viewHolder.repoFav.setBackgroundResource(R.drawable.star_selected);
                     }
                     else {
                         favList.remove(id);
-                        //viewHolder.repoFav.setBackground(R.drawable.star_unselected);
+                        viewHolder.repoFav.setBackgroundResource(R.drawable.star_unselected);
                     }
                     editor.putStringSet("favList",favList);
                     editor.apply();

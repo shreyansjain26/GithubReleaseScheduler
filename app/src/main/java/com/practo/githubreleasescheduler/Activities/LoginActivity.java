@@ -102,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
 
         RequestQueue queue = Volley.newRequestQueue(this);
         JsonObjectRequest req;
-
         req = new JsonObjectRequest(Request.Method.POST, url, json,
                 new Response.Listener<JSONObject>() {
                     @Override
