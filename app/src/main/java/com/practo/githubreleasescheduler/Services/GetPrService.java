@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -102,10 +103,6 @@ public class GetPrService extends IntentService {
                         getApplicationContext().getContentResolver().
                                 bulkInsert(GitContentProvider.PR_URI, value);
 
-                        if (length != 0 && length == 100) {
-                            getPrs(mileNumber, page + 1);
-                        }
-
                         try {
                             getApplicationContext().getContentResolver().
                                     bulkInsert(GitContentProvider.LABELS_URI,
@@ -113,7 +110,9 @@ public class GetPrService extends IntentService {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-
+                        if (length != 0 && length == 100) {
+                            getPrs(mileNumber, page + 1);
+                        }
                     }
                 }, new Response.ErrorListener() {
             @Override

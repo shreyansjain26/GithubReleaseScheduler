@@ -106,6 +106,10 @@ public class RepoActivity extends AppCompatActivity implements
             case R.id.action_logout:
                 logout();
                 return true;
+            case R.id.action_refresh:
+                Intent getDataService = new Intent(this, GetRepoService.class);
+                this.startService(getDataService);
+                return true;
             case R.id.action_favourites:
                 if (showFavourites) {
                     showFavourites = false;
@@ -119,7 +123,7 @@ public class RepoActivity extends AppCompatActivity implements
         }
     }
 
-    private void logout() {
+    public void logout() {
         final SharedPreferences settings;
         settings = this.getSharedPreferences("AUTHTOKEN", Context.MODE_PRIVATE);
         final String oAuthToken = settings.getString("authtoken", null);

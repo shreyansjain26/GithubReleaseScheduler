@@ -11,6 +11,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -20,6 +22,7 @@ import com.practo.githubreleasescheduler.Databases.PullRequestTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetPrService;
+import com.practo.githubreleasescheduler.Services.GetRepoService;
 
 
 public class PrActivity extends AppCompatActivity implements
@@ -30,6 +33,8 @@ public class PrActivity extends AppCompatActivity implements
     private String mMileId;
     private PrAdapter adapter;
     private String mileNumber;
+    private String mOwner;
+    private String mRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,8 +52,8 @@ public class PrActivity extends AppCompatActivity implements
 
         Bundle extras = getIntent().getExtras();
         String milestone = extras.get("mile").toString();
-        String repo = extras.get("repo").toString();
-        String owner = extras.get("owner").toString();
+        mRepo = extras.get("repo").toString();
+        mOwner = extras.get("owner").toString();
         mileNumber = extras.get("number").toString();
         mMileId = extras.getString("mileID");
         String open = extras.getString("open");
@@ -57,8 +62,8 @@ public class PrActivity extends AppCompatActivity implements
         String lastUpdate = extras.getString("lastUpdate");
 
         Intent getDataService = new Intent(this, GetPrService.class);
-        getDataService.putExtra("owner", owner);
-        getDataService.putExtra("repo", repo);
+        getDataService.putExtra("owner", mOwner);
+        getDataService.putExtra("repo", mRepo);
         getDataService.putExtra("mileNumber", mileNumber);
         this.startService(getDataService);
 
@@ -122,14 +127,30 @@ public class PrActivity extends AppCompatActivity implements
         this.adapter.swapCursor(null);
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_refresh:
+                Intent getDataService = new Intent(this, GetPrService.class);
+                getDataService.putExtra("owner", mOwner);
+                getDataService.putExtra("repo", mRepo);
+                getDataService.putExtra("mileNumber", mileNumber);
+                this.startService(getDataService);
+                return true;
             case android.R.id.home:
                 onBackPressed();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_others, menu);
+        return true;
     }
 }

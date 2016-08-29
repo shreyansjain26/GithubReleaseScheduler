@@ -11,14 +11,18 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 
 
 import com.practo.githubreleasescheduler.Adapters.MilesAdapter;
 import com.practo.githubreleasescheduler.Databases.MilestoneTable;
+import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.Providers.GitContentProvider;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Services.GetMilesService;
+import com.practo.githubreleasescheduler.Services.GetRepoService;
 
 
 public class MilestoneActivity extends AppCompatActivity implements
@@ -105,8 +109,22 @@ public class MilestoneActivity extends AppCompatActivity implements
             case android.R.id.home:
                 onBackPressed();
                 return true;
+            case R.id.action_refresh:
+                Intent getDataService = new Intent(this, GetMilesService.class);
+                getDataService.putExtra("repo", repo);
+                getDataService.putExtra("owner", owner);
+                getDataService.putExtra("repoId", repoId);
+                this.startService(getDataService);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_others, menu);
+        return true;
     }
 }
