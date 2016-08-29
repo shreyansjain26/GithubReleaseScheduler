@@ -17,6 +17,7 @@
         android:textAlignment="center"
         android:maxLines="1"
         android:hint="Username"
+        android:imeOptions="actionNext"
         android:layout_marginTop="10dp"
         android:layout_centerHorizontal="true" />
 

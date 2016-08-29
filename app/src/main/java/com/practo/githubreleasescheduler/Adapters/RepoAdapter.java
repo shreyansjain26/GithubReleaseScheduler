@@ -93,6 +93,9 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
             if (favList.contains(id)) {
                 viewHolder.repoFav.setBackgroundResource(R.drawable.star_selected);
             }
+            else {
+                viewHolder.repoFav.setBackgroundResource(R.drawable.star_unselected);
+            }
 
             viewHolder.repoFav.setOnClickListener(new View.OnClickListener() {
                 @Override
