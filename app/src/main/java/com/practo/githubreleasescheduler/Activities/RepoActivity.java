@@ -1,6 +1,7 @@
 package com.practo.githubreleasescheduler.Activities;
 
 import android.content.ContentResolver;
+import android.provider.ContactsContract;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.support.v4.content.CursorLoader;
@@ -12,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
@@ -35,13 +37,17 @@ import com.practo.githubreleasescheduler.Services.GetRepoService;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class RepoActivity extends AppCompatActivity implements
         LoaderManager.LoaderCallbacks<Cursor> {
     private String oAuthToken;
     private RepoAdapter adapter;
     private int mId = 123;
+    private Boolean showFavourites = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +77,7 @@ public class RepoActivity extends AppCompatActivity implements
     public void showList() {
 
         RecyclerView rvRepos = (RecyclerView) findViewById(R.id.rvRepos);
-        adapter = new RepoAdapter(null);
+        adapter = new RepoAdapter(this,null);
         rvRepos.setAdapter(adapter);
         rvRepos.setLayoutManager(new LinearLayoutManager(this));
     }
@@ -99,6 +105,14 @@ public class RepoActivity extends AppCompatActivity implements
                 return true;
             case R.id.action_logout:
                 logout();
+                return true;
+            case R.id.action_favourites:
+                if (showFavourites) {
+                    showFavourites = false;
+                } else {
+                    showFavourites = true;
+                }
+                getSupportLoaderManager().restartLoader(1, null, RepoActivity.this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -160,15 +174,28 @@ public class RepoActivity extends AppCompatActivity implements
 
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        CursorLoader loader = new CursorLoader(this,
-                GitContentProvider.REPO_URI,
-                null,
-                null,
-                null,
-                RepositoryTable.COLUMN_NAME + " ASC"
-        );
+        if (showFavourites) {
 
-        return loader;
+            String favList = getFavList();
+
+            CursorLoader loader = new CursorLoader(this,
+                    GitContentProvider.REPO_URI,
+                    null,
+                    RepositoryTable.COLUMN_ID + " IN ( " + favList + " )",
+                    null,
+                    RepositoryTable.COLUMN_NAME + " ASC"
+            );
+            return loader;
+        } else {
+            CursorLoader loader = new CursorLoader(this,
+                    GitContentProvider.REPO_URI,
+                    null,
+                    null,
+                    null,
+                    RepositoryTable.COLUMN_NAME + " ASC"
+            );
+            return loader;
+        }
     }
 
     @Override
@@ -198,6 +225,17 @@ public class RepoActivity extends AppCompatActivity implements
         Intent intent = new Intent(RepoActivity.this, LoginActivity.class);
         RepoActivity.this.startActivity(intent);
         finish();
+    }
+
+    public String getFavList() {
+        SharedPreferences pref;
+        pref = this.getSharedPreferences("FAVOURITES", Context.MODE_PRIVATE);
+        Set<String> favList = pref.getStringSet("favList", new HashSet<String>());
+        if (favList.isEmpty()) {
+            return "";
+        }
+        Log.d("list",TextUtils.join(",",favList));
+        return TextUtils.join(",",favList);
     }
 
 }

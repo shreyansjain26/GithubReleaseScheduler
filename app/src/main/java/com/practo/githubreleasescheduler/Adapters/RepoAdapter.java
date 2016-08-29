@@ -1,18 +1,24 @@
 package com.practo.githubreleasescheduler.Adapters;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.practo.githubreleasescheduler.Activities.MilestoneActivity;
+import com.practo.githubreleasescheduler.Activities.RepoActivity;
 import com.practo.githubreleasescheduler.Databases.RepositoryTable;
 import com.practo.githubreleasescheduler.R;
 import com.practo.githubreleasescheduler.Utils.Utils;
 
+import java.util.HashSet;
+import java.util.Set;
 
 
 public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
@@ -23,14 +29,15 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
 
         public TextView repoName;
         public TextView repoOwner;
+        public ImageButton repoFav;
 
-
-        public ViewHolder(View itemView) {
+        public ViewHolder(final View itemView) {
             super(itemView);
 
             repoName = (TextView) itemView.findViewById(R.id.name);
             repoOwner = (TextView) itemView.findViewById(R.id.owner);
-            itemView.setOnClickListener(this);
+            repoFav = (ImageButton) itemView.findViewById(R.id.favourite);
+            repoName.setOnClickListener(this);
         }
 
         @Override
@@ -47,9 +54,11 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
         }
     }
 
+    private Context mContext;
     private Cursor mCursor;
 
-    public RepoAdapter(Cursor cursor) {
+    public RepoAdapter(Context context, Cursor cursor) {
+        mContext = context;
         mCursor = cursor;
     }
 
@@ -62,9 +71,9 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
 
 
     @Override
-    public void onBindViewHolder(RepoAdapter.ViewHolder viewHolder, int position) {
+    public void onBindViewHolder(final RepoAdapter.ViewHolder viewHolder, int position) {
 
-        String id, name, owner;
+        final String id, name, owner;
 
         if (!Utils.isCursorEmpty(mCursor) && mCursor.moveToPosition(position)) {
             id = mCursor.getString(mCursor.getColumnIndexOrThrow(
@@ -77,6 +86,27 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
             viewHolder.repoName.setText(name);
             viewHolder.repoName.setTag(id);
             viewHolder.repoOwner.setText(owner);
+            viewHolder.repoFav.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SharedPreferences pref;
+                    pref = mContext.getSharedPreferences("FAVOURITES", Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor;
+                    editor = pref.edit();
+                    Set<String> favList = pref.getStringSet("favList", new HashSet<String>());
+                    if (!favList.contains(id)){
+                        favList.add(id);
+                        //viewHolder.repoFav.setBackground(R.drawable.star_selected);
+                    }
+                    else {
+                        favList.remove(id);
+                        //viewHolder.repoFav.setBackground(R.drawable.star_unselected);
+                    }
+                    editor.putStringSet("favList",favList);
+                    editor.apply();
+                }
+            });
+
         }
 
     }
@@ -106,5 +136,4 @@ public class RepoAdapter extends RecyclerView.Adapter<RepoAdapter.ViewHolder> {
         }
         return oldCursor;
     }
-
 }
